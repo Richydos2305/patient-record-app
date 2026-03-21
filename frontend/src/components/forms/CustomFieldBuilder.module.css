@@ -1,0 +1,132 @@
+.icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #2d3748;
+}
+
+.select {
+  padding: 0.75rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s;
+  outline: none;
+  font-family: inherit;
+  background: white;
+  cursor: pointer;
+}
+
+.select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.select:hover {
+  border-color: #cbd5e0;
+}
+
+.input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s;
+  outline: none;
+  font-family: inherit;
+  width: 100%;
+}
+
+.input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.optionInput {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.optionList {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.625rem 0.875rem;
+  background: #f7fafc;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.removeButton {
+  background: transparent;
+  border: none;
+  color: #f56565;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.removeButton:hover {
+  background: #fed7d7;
+}
+
+.hint {
+  font-size: 0.875rem;
+  color: #718096;
+  margin: 0.5rem 0 0 0;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkboxInput {
+  width: 1.125rem;
+  height: 1.125rem;
+  cursor: pointer;
+  accent-color: #667eea;
+}
+
+.checkboxLabel {
+  font-size: 0.9375rem;
+  color: #2d3748;
+  cursor: pointer;
+  user-select: none;
+}

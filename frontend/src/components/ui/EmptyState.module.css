@@ -1,0 +1,32 @@
+.container {
+  text-align: center;
+  padding: 3rem 1.5rem;
+}
+
+.icon {
+  margin: 0 auto 1.5rem;
+  color: #cbd5e0;
+}
+
+.icon svg {
+  width: 4rem;
+  height: 4rem;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0 0 0.5rem 0;
+}
+
+.description {
+  font-size: 0.9375rem;
+  color: #718096;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.6;
+}
+
+.action {
+  margin-top: 1.5rem;
+}

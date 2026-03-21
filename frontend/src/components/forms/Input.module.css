@@ -1,0 +1,74 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #2d3748;
+}
+
+.required {
+  color: #f56565;
+  margin-left: 0.25rem;
+}
+
+.input {
+  padding: 0.75rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s;
+  outline: none;
+  font-family: inherit;
+}
+
+.input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.input:hover:not(:focus):not(:disabled) {
+  border-color: #cbd5e0;
+}
+
+.input:disabled {
+  background: #f7fafc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.inputError {
+  border-color: #fc8181;
+}
+
+.inputError:focus {
+  border-color: #f56565;
+  box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.1);
+}
+
+.error {
+  color: #f56565;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .input {
+    font-size: 16px; /* Prevents iOS zoom */
+    min-height: 44px; /* Minimum touch target */
+  }
+
+  .label {
+    font-size: 0.9375rem;
+  }
+}

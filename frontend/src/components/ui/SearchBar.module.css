@@ -1,0 +1,75 @@
+.container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
+}
+
+.icon {
+  position: absolute;
+  left: 1rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #718096;
+  pointer-events: none;
+  transition: color 0.2s;
+}
+
+.focused .icon {
+  color: #667eea;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 3rem 0.75rem 3rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.9375rem;
+  transition: all 0.2s;
+  outline: none;
+  background: white;
+}
+
+.input:hover {
+  border-color: #cbd5e0;
+}
+
+.input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.input::placeholder {
+  color: #a0aec0;
+}
+
+.clearButton {
+  position: absolute;
+  right: 0.75rem;
+  background: transparent;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.clearButton:hover {
+  background: #f7fafc;
+}
+
+.clearIcon {
+  width: 1.125rem;
+  height: 1.125rem;
+  color: #718096;
+}
+
+@media (max-width: 640px) {
+  .container {
+    max-width: none;
+  }
+}
