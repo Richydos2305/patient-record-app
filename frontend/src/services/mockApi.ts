@@ -2,7 +2,7 @@ import type { User, LoginCredentials, RegisterData, AuthResponse, Patient, Creat
 
 // Mock database
 const users: User[] = [];
-const patients: Patient[] = [];
+let patients: Patient[] = [];
 
 // Helper to simulate API delay
 const delay = (ms: number = 500) => new Promise(resolve => setTimeout(resolve, ms));
