@@ -22,7 +22,7 @@ export function PatientForm() {
   const { addToast } = useToast();
   const isEditing = id !== 'new' && !!id;
 
-  const { data: patient, isLoading: isLoadingPatient } = usePatient(id || '');
+  const { data: patient, isLoading: isLoadingPatient } = usePatient(isEditing ? id! : '');
   const createPatient = useCreatePatient();
   const updatePatient = useUpdatePatient();
 
@@ -48,95 +48,66 @@ export function PatientForm() {
     defaultValues: {
       fullName: '',
       dateOfBirth: '',
-      houseAddress: '',
+      address: '',
       phoneNumber: '',
-      emergencyContact: '',
-      nextAppointmentDate: '',
-      pharmacistNotes: '',
-      currentPrescriptions: [],
+      emergencyContact: { name: '', phone: '', relationship: '' },
+      appointmentDates: [{ date: '' }],
+      notes: '',
+      prescriptions: [],
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields: prescriptionFields, append: appendPrescription, remove: removePrescription } = useFieldArray({
     control,
-    name: 'currentPrescriptions',
+    name: 'prescriptions',
+  });
+
+  const { fields: appointmentFields, append: appendAppointment, remove: removeAppointment } = useFieldArray({
+    control,
+    name: 'appointmentDates',
   });
 
   // Load patient data when editing
   useEffect(() => {
     if (patient && isEditing) {
+      const toDateInput = (iso: string) => iso.split('T')[0];
       reset({
         fullName: patient.fullName,
-        dateOfBirth: patient.dateOfBirth,
-        houseAddress: patient.houseAddress,
+        dateOfBirth: toDateInput(patient.dateOfBirth),
+        address: patient.address,
         phoneNumber: patient.phoneNumber,
         emergencyContact: patient.emergencyContact,
-        nextAppointmentDate: patient.nextAppointmentDate,
-        pharmacistNotes: patient.pharmacistNotes || '',
-        currentPrescriptions: patient.currentPrescriptions.map((rx) => ({
+        appointmentDates: patient.appointmentDates.map((d) => ({ date: toDateInput(d) })),
+        notes: patient.notes || '',
+        prescriptions: patient.prescriptions.map((rx) => ({
           medicationName: rx.medicationName,
           dosage: rx.dosage,
           frequency: rx.frequency,
-          prescriptionDate: rx.prescriptionDate,
+          prescriptionDate: toDateInput(rx.prescriptionDate),
         })),
       });
-      
-      // Load custom fields and separate by section
-      if (patient.customFields && patient.customFields.length > 0) {
-        const personal: CustomField[] = [];
-        const medical: CustomField[] = [];
-        
-        patient.customFields.forEach(cf => {
-          // Check if the field has a section property, otherwise default based on position
-          const field = cf.field;
-          if (!field.section) {
-            // Default: first half go to personal, second half to medical
-            const index = patient.customFields.indexOf(cf);
-            if (index < patient.customFields.length / 2) {
-              personal.push({ ...field, section: 'personal' });
-            } else {
-              medical.push({ ...field, section: 'medical' });
-            }
-          } else if (field.section === 'personal') {
-            personal.push(field);
-          } else {
-            medical.push(field);
-          }
-        });
-        
-        setPersonalCustomFields(personal);
-        setMedicalCustomFields(medical);
-        setCustomFieldValues(patient.customFields);
-      }
     }
   }, [patient, isEditing, reset]);
 
   const onSubmit = async (data: PatientFormData) => {
     try {
-      // Combine all custom fields from both sections
-      const allCustomFields = [
-        ...personalCustomFields.map(field => {
-          const value = customFieldValues.find(v => v.fieldId === field.id);
-          return {
-            fieldId: field.id,
-            field,
-            value: value?.value || '',
-          };
-        }),
-        ...medicalCustomFields.map(field => {
-          const value = customFieldValues.find(v => v.fieldId === field.id);
-          return {
-            fieldId: field.id,
-            field,
-            value: value?.value || '',
-          };
-        }),
-      ];
+      // Build customFields as Record<string, unknown> keyed by field name
+      const customFieldsMap: Record<string, unknown> = {};
+      [...personalCustomFields, ...medicalCustomFields].forEach((field) => {
+        const value = customFieldValues.find((v) => v.fieldId === field.id);
+        customFieldsMap[field.name] = value?.value ?? '';
+      });
 
       const patientData: CreatePatientRequest = {
-        ...data,
-        pharmacistNotes: data.pharmacistNotes || '',
-        customFields: allCustomFields,
+        fullName: data.fullName,
+        dateOfBirth: data.dateOfBirth,
+        address: data.address,
+        phoneNumber: data.phoneNumber,
+        emergencyContact: data.emergencyContact,
+        prescriptions: data.prescriptions || [],
+        appointmentDates: data.appointmentDates.map((a) => a.date),
+        ...(data.notes ? { notes: data.notes } : {}),
+        customFields: customFieldsMap,
       };
 
       if (isEditing && id) {
@@ -166,7 +137,6 @@ export function PatientForm() {
     const newField: CustomField = {
       ...field,
       id: `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      section,
     };
     
     if (section === 'personal') {
@@ -204,7 +174,7 @@ export function PatientForm() {
     });
   }, []);
 
-  const handleSaveCustomField = useCallback((field: Omit<CustomField, 'id' | 'section'>) => {
+  const handleSaveCustomField = useCallback((field: Omit<CustomField, 'id'>) => {
     if (showCustomFieldBuilder.section) {
       handleAddCustomField(field, showCustomFieldBuilder.section);
       setShowCustomFieldBuilder({ show: false, section: undefined });
@@ -294,18 +264,32 @@ export function PatientForm() {
                   required
                 />
                 <Input
-                  label="Emergency Contact"
-                  {...register('emergencyContact')}
-                  error={errors.emergencyContact?.message}
-                  placeholder="Name - Phone"
+                  label="Emergency Contact Name"
+                  {...register('emergencyContact.name')}
+                  error={errors.emergencyContact?.name?.message}
+                  placeholder="Contact full name"
+                  required
+                />
+                <Input
+                  label="Emergency Contact Phone"
+                  {...register('emergencyContact.phone')}
+                  error={errors.emergencyContact?.phone?.message}
+                  placeholder="Contact phone number"
+                  required
+                />
+                <Input
+                  label="Emergency Contact Relationship"
+                  {...register('emergencyContact.relationship')}
+                  error={errors.emergencyContact?.relationship?.message}
+                  placeholder="e.g., Spouse, Parent"
                   required
                 />
               </div>
               
               <Input
-                label="House Address"
-                {...register('houseAddress')}
-                error={errors.houseAddress?.message}
+                label="Home Address"
+                {...register('address')}
+                error={errors.address?.message}
                 placeholder="Street, City, State ZIP"
                 required
               />
@@ -365,17 +349,57 @@ export function PatientForm() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Input
-                label="Next Appointment Date"
-                type="date"
-                {...register('nextAppointmentDate')}
-                error={errors.nextAppointmentDate?.message}
-                required
-              />
+              {/* Appointment Dates */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium">Appointment Dates *</label>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => appendAppointment({ date: '' })}
+                    aria-label="Add appointment date"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Date
+                  </Button>
+                </div>
+                {errors.appointmentDates?.root?.message && (
+                  <p className="text-sm text-destructive mb-2" role="alert">
+                    {errors.appointmentDates.root.message}
+                  </p>
+                )}
+                {appointmentFields.map((apptField, index) => (
+                  <div key={apptField.id} className="flex items-center gap-2 mb-2">
+                    <Input
+                      label={`Appointment ${index + 1}`}
+                      type="date"
+                      {...register(`appointmentDates.${index}.date`)}
+                      error={errors.appointmentDates?.[index]?.date?.message}
+                    />
+                    {appointmentFields.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeAppointment(index)}
+                        className="mt-6"
+                        aria-label={`Remove appointment ${index + 1}`}
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
               <Textarea
-                label="Pharmacist Notes"
-                {...register('pharmacistNotes')}
-                error={errors.pharmacistNotes?.message}
+                label="Notes"
+                {...register('notes')}
+                error={errors.notes?.message}
                 placeholder="Add any relevant notes about the patient..."
                 rows={4}
               />
@@ -428,7 +452,7 @@ export function PatientForm() {
                   variant="secondary"
                   size="sm"
                   onClick={() =>
-                    append({
+                    appendPrescription({
                       medicationName: '',
                       dosage: '',
                       frequency: '',
@@ -455,13 +479,13 @@ export function PatientForm() {
               </div>
             </CardHeader>
             <CardContent>
-              {fields.length === 0 ? (
+              {prescriptionFields.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8" role="status">
                   No prescriptions added yet. Click "Add Prescription" to add one.
                 </p>
               ) : (
                 <div className="space-y-6">
-                  {fields.map((field, index) => (
+                  {prescriptionFields.map((field, index) => (
                     <div key={field.id} className="space-y-4">
                       <div className="flex items-center justify-between">
                         <h3 className="text-sm font-medium">
@@ -471,7 +495,7 @@ export function PatientForm() {
                           type="button"
                           variant="ghost"
                           size="sm"
-                          onClick={() => remove(index)}
+                          onClick={() => removePrescription(index)}
                           aria-label={`Remove prescription ${index + 1}`}
                         >
                           <svg
@@ -495,29 +519,29 @@ export function PatientForm() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Input
                           label="Medication Name"
-                          {...register(`currentPrescriptions.${index}.medicationName`)}
-                          error={errors.currentPrescriptions?.[index]?.medicationName?.message}
+                          {...register(`prescriptions.${index}.medicationName`)}
+                          error={errors.prescriptions?.[index]?.medicationName?.message}
                           required
                         />
                         <Input
                           label="Dosage"
-                          {...register(`currentPrescriptions.${index}.dosage`)}
-                          error={errors.currentPrescriptions?.[index]?.dosage?.message}
+                          {...register(`prescriptions.${index}.dosage`)}
+                          error={errors.prescriptions?.[index]?.dosage?.message}
                           placeholder="e.g., 10mg"
                           required
                         />
                         <Input
                           label="Frequency"
-                          {...register(`currentPrescriptions.${index}.frequency`)}
-                          error={errors.currentPrescriptions?.[index]?.frequency?.message}
+                          {...register(`prescriptions.${index}.frequency`)}
+                          error={errors.prescriptions?.[index]?.frequency?.message}
                           placeholder="e.g., Once daily"
                           required
                         />
                         <Input
                           label="Prescription Date"
                           type="date"
-                          {...register(`currentPrescriptions.${index}.prescriptionDate`)}
-                          error={errors.currentPrescriptions?.[index]?.prescriptionDate?.message}
+                          {...register(`prescriptions.${index}.prescriptionDate`)}
+                          error={errors.prescriptions?.[index]?.prescriptionDate?.message}
                           required
                         />
                       </div>

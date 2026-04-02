@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { patientApi } from '../services/mockApi';
+import { patientApi } from '../services/api';
 import type { CreatePatientRequest, UpdatePatientRequest } from '../types';
 
 export function usePatients() {
@@ -32,7 +32,7 @@ export function useUpdatePatient() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: UpdatePatientRequest) => patientApi.updatePatient(data),
+    mutationFn: ({ id, ...rest }: UpdatePatientRequest) => patientApi.updatePatient(id, rest),
     onSuccess: (updatedPatient) => {
       queryClient.invalidateQueries({ queryKey: ['patients'] });
       queryClient.invalidateQueries({ queryKey: ['patient', updatedPatient.id] });

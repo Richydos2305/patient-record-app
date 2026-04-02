@@ -1,9 +1,12 @@
 export interface SanitizedUser {
-    _id: unknown;
+    id: string;
     email: string;
-    firstName: string;
-    lastName: string;
+    fullName: string;
     role: string;
+    phoneNumber?: string;
+    companyName?: string;
+    companyLogo?: string;
+    primaryColor?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -11,8 +14,7 @@ export interface SanitizedUser {
 export interface RegisterBody {
     email: string;
     password: string;
-    firstName: string;
-    lastName: string;
+    fullName: string;
 }
 
 export interface LoginBody {
@@ -26,7 +28,17 @@ export interface LoginResult {
     user: SanitizedUser;
 }
 
+export type RegisterResult = LoginResult;
+
 export interface RefreshResult {
     accessToken: string;
     refreshToken: string;
+}
+
+export interface UpdateProfileBody {
+    fullName?: string;
+    phoneNumber?: string;
+    companyName?: string;
+    companyLogo?: string;
+    primaryColor?: string;
 }

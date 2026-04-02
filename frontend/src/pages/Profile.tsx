@@ -4,9 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import { Layout } from '../components/layout/Layout';
 import { Input } from '../components/forms/Input';
-import { ImageUpload } from '../components/forms/ImageUpload';
 import { Button } from '@/components/ui/button';
-import { Input as ShadcnInput } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '../contexts/AuthContext';
@@ -24,13 +22,10 @@ export function Profile() {
     handleSubmit,
     formState: { errors },
     reset,
-    setValue,
-    watch,
   } = useForm<ProfileUpdateData>({
     resolver: zodResolver(profileUpdateSchema),
     defaultValues: {
       fullName: '',
-      email: '',
       phoneNumber: '',
       companyName: '',
       companyLogo: '',
@@ -38,16 +33,11 @@ export function Profile() {
     },
   });
 
-  // Watch logo and color for controlled updates
-  const companyLogo = watch('companyLogo');
-  const primaryColor = watch('primaryColor');
-
   // Load user data on mount
   useEffect(() => {
     if (user) {
       reset({
         fullName: user.fullName,
-        email: user.email,
         phoneNumber: user.phoneNumber || '',
         companyName: user.companyName || '',
         companyLogo: user.companyLogo || '',
@@ -59,7 +49,14 @@ export function Profile() {
   const onSubmit = async (data: ProfileUpdateData) => {
     setIsSubmitting(true);
     try {
-      await updateUser(data);
+      // Strip empty optional fields so the backend doesn't receive empty strings
+      const payload: ProfileUpdateData = { fullName: data.fullName };
+      if (data.phoneNumber) payload.phoneNumber = data.phoneNumber;
+      if (data.companyName) payload.companyName = data.companyName;
+      if (data.companyLogo) payload.companyLogo = data.companyLogo;
+      if (data.primaryColor) payload.primaryColor = data.primaryColor;
+
+      await updateUser(payload);
       
       // Apply theme color if changed
       if (data.primaryColor) {
@@ -116,35 +113,26 @@ export function Profile() {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Business Branding Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Business Branding</CardTitle>
-              <CardDescription>
-                Customize your company name and logo to personalize the application
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Input
-                label="Company Name"
-                {...register('companyName')}
-                error={errors.companyName?.message}
-                placeholder="Your Pharmacy Name"
-              />
-
-              <ImageUpload
-                label="Company Logo"
-                value={companyLogo}
-                onChange={(base64) => setValue('companyLogo', base64 || '')}
-                error={errors.companyLogo?.message}
-                maxSizeMB={2}
-              />
-
-              <div className="text-sm text-muted-foreground">
-                Your logo will appear in the navigation header and on login pages
-              </div>
-            </CardContent>
-          </Card>
+          {/* Business Branding Section — Coming Soon */}
+          <div className="relative">
+            <Card className="opacity-50 pointer-events-none select-none">
+              <CardHeader>
+                <CardTitle>Business Branding</CardTitle>
+                <CardDescription>
+                  Customize your company name and logo to personalize the application
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="h-10 bg-muted rounded" />
+                <div className="h-24 bg-muted rounded" />
+              </CardContent>
+            </Card>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="bg-primary text-primary-foreground text-sm font-semibold px-4 py-1.5 rounded-full shadow">
+                Coming Soon
+              </span>
+            </div>
+          </div>
 
           {/* Personal Information Section */}
           <Card>
@@ -162,13 +150,6 @@ export function Profile() {
                   error={errors.fullName?.message}
                   required
                 />
-                <Input
-                  label="Email Address"
-                  type="email"
-                  {...register('email')}
-                  error={errors.email?.message}
-                  required
-                />
               </div>
               
               <Input
@@ -181,70 +162,26 @@ export function Profile() {
             </CardContent>
           </Card>
 
-          {/* Theme Customization Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Theme Customization</CardTitle>
-              <CardDescription>
-                Personalize the application colors to match your brand
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="primaryColor" className="text-sm font-medium">
-                  Primary Brand Color
-                </label>
-                <div className="flex items-center gap-4">
-                  <input
-                    id="primaryColor"
-                    type="color"
-                    {...register('primaryColor')}
-                    className="h-10 w-20 rounded border border-border cursor-pointer"
-                  />
-                  <ShadcnInput
-                    type="text"
-                    {...register('primaryColor')}
-                    placeholder="#667eea"
-                    className={`flex-1 ${errors.primaryColor ? 'border-destructive' : ''}`}
-                    aria-invalid={!!errors.primaryColor}
-                    aria-describedby={errors.primaryColor ? 'primaryColor-error' : undefined}
-                  />
-                </div>
-                {errors.primaryColor && (
-                  <p id="primaryColor-error" className="text-sm text-destructive" role="alert">
-                    {errors.primaryColor.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="p-4 rounded-lg border border-border bg-muted">
-                <p className="text-sm text-muted-foreground mb-3">Preview:</p>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    style={{
-                      backgroundColor: primaryColor,
-                      borderColor: primaryColor,
-                    }}
-                  >
-                    Primary Button
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    style={{
-                      borderColor: primaryColor,
-                      color: primaryColor,
-                    }}
-                  >
-                    Outline Button
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Theme Customization Section — Coming Soon */}
+          <div className="relative">
+            <Card className="opacity-50 pointer-events-none select-none">
+              <CardHeader>
+                <CardTitle>Theme Customization</CardTitle>
+                <CardDescription>
+                  Personalize the application colors to match your brand
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="h-10 bg-muted rounded" />
+                <div className="h-16 bg-muted rounded" />
+              </CardContent>
+            </Card>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="bg-primary text-primary-foreground text-sm font-semibold px-4 py-1.5 rounded-full shadow">
+                Coming Soon
+              </span>
+            </div>
+          </div>
 
           <Separator />
 

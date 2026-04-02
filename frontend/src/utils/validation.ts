@@ -10,12 +10,18 @@ export const prescriptionSchema = z.object({
 export const patientFormSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
   dateOfBirth: z.string().min(1, 'Date of birth is required'),
-  houseAddress: z.string().min(5, 'Address must be at least 5 characters'),
+  address: z.string().min(5, 'Address must be at least 5 characters'),
   phoneNumber: z.string().min(10, 'Phone number must be at least 10 characters'),
-  emergencyContact: z.string().min(5, 'Emergency contact is required'),
-  nextAppointmentDate: z.string().min(1, 'Next appointment date is required'),
-  pharmacistNotes: z.string(),
-  currentPrescriptions: z.array(prescriptionSchema),
+  emergencyContact: z.object({
+    name: z.string().min(1, 'Emergency contact name is required'),
+    phone: z.string().min(1, 'Emergency contact phone is required'),
+    relationship: z.string().min(1, 'Emergency contact relationship is required'),
+  }),
+  appointmentDates: z
+    .array(z.object({ date: z.string().min(1, 'Date is required') }))
+    .min(1, 'At least one appointment date is required'),
+  notes: z.string().optional(),
+  prescriptions: z.array(prescriptionSchema),
 });
 
 export type PatientFormData = z.infer<typeof patientFormSchema>;
@@ -24,7 +30,6 @@ export type PrescriptionFormData = z.infer<typeof prescriptionSchema>;
 // Profile update schema
 export const profileUpdateSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
   phoneNumber: z.string().optional(),
   companyName: z.string().optional(),
   companyLogo: z.string().optional(),

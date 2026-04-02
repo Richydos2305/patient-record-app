@@ -1,6 +1,14 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
 import type { User, LoginCredentials, RegisterData, UpdateUserRequest } from '../types';
-import { authApi } from '../services/mockApi';
+import { authApi } from '../services/api';
+import axios from 'axios';
+
+function extractErrorMessage(error: unknown, fallback: string): string {
+  if (axios.isAxiosError(error)) {
+    return (error.response?.data as { message?: string })?.message ?? fallback;
+  }
+  return error instanceof Error ? error.message : fallback;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -15,42 +23,58 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Check for existing session on mount
-    const checkAuth = async () => {
+  const [user, setUser] = useState<User | null>(() => {
+    const storedUser = localStorage.getItem('user');
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken && storedUser) {
       try {
-        const currentUser = await authApi.getCurrentUser();
-        setUser(currentUser);
-      } catch (error) {
-        console.error('Failed to check auth:', error);
-      } finally {
-        setIsLoading(false);
+        return JSON.parse(storedUser);
+      } catch {
+        localStorage.removeItem('user');
       }
-    };
-
-    checkAuth();
-  }, []);
+    }
+    return null;
+  });
+  const [isLoading] = useState(false);
 
   const login = async (credentials: LoginCredentials) => {
-    const { user: newUser } = await authApi.login(credentials);
-    setUser(newUser);
+    try {
+      const { accessToken, refreshToken, user: newUser } = await authApi.login(credentials);
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('user', JSON.stringify(newUser));
+      setUser(newUser);
+    } catch (error) {
+      throw new Error(extractErrorMessage(error, 'Invalid credentials'));
+    }
   };
 
   const register = async (data: RegisterData) => {
-    const { user: newUser } = await authApi.register(data);
-    setUser(newUser);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { confirmPassword: _, ...payload } = data;
+      const { accessToken, refreshToken, user: newUser } = await authApi.register(payload);
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('user', JSON.stringify(newUser));
+      setUser(newUser);
+    } catch (error) {
+      throw new Error(extractErrorMessage(error, 'Registration failed'));
+    }
   };
 
   const logout = async () => {
-    await authApi.logout();
+    const refreshToken = localStorage.getItem('refreshToken') ?? '';
+    await authApi.logout(refreshToken);
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
     setUser(null);
   };
 
   const updateUser = async (data: UpdateUserRequest) => {
-    const updatedUser = await authApi.updateUser(data);
+    const updatedUser = await authApi.updateProfile(data);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
     setUser(updatedUser);
   };
 
@@ -67,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext value={value}>{children}</AuthContext>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

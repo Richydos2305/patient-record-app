@@ -1,26 +1,25 @@
-import { IEmergencyContact } from '../../interfaces/models';
+import { IEmergencyContact, IPrescription } from '../../interfaces/models';
+import { IPatientDocument } from '../../models/Patient';
 
 export interface CreatePatientBody {
-    firstName: string;
-    lastName: string;
+    fullName: string;
     dateOfBirth: string;
     address: string;
-    phone: string;
+    phoneNumber: string;
     emergencyContact: IEmergencyContact;
-    prescriptions?: string[];
+    prescriptions?: IPrescription[];
     appointmentDates?: string[];
     notes?: string;
     customFields?: Record<string, unknown>;
 }
 
 export interface UpdatePatientBody {
-    firstName?: string;
-    lastName?: string;
+    fullName?: string;
     dateOfBirth?: string;
     address?: string;
-    phone?: string;
+    phoneNumber?: string;
     emergencyContact?: Partial<IEmergencyContact>;
-    prescriptions?: string[];
+    prescriptions?: IPrescription[];
     appointmentDates?: string[];
     notes?: string;
     customFields?: Record<string, unknown>;
@@ -30,4 +29,11 @@ export interface ListPatientsQuery {
     page?: number;
     limit?: number;
     search?: string;
+}
+
+export interface PaginatedPatientsResult {
+    patients: IPatientDocument[];
+    total: number;
+    page: number;
+    limit: number;
 }

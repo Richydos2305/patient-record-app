@@ -29,8 +29,7 @@ const mockUser = () => ({
     _id: MOCK_USER_ID,
     email: 'test@pharmacy.com',
     password: hashedPassword,
-    firstName: 'John',
-    lastName: 'Doe',
+    fullName: 'John Doe',
     role: 'pharmacist',
     toObject() { return { ...this }; },
 });
@@ -49,18 +48,21 @@ describe('AuthService.register', () => {
             findOne: vi.fn().mockResolvedValue(null),
             create: vi.fn().mockResolvedValue(user),
         } as unknown as UserRepository;
-        const tokenRepo = {} as unknown as RefreshTokenRepository;
+        const tokenRepo = {
+            create: vi.fn().mockResolvedValue({}),
+        } as unknown as RefreshTokenRepository;
         const service = new AuthService(userRepo, tokenRepo);
 
         const result = await service.register({
             email: 'test@pharmacy.com',
             password: 'password123',
-            firstName: 'John',
-            lastName: 'Doe',
+            fullName: 'John Doe',
         });
 
-        expect(result).not.toHaveProperty('password');
-        expect(result.email).toBe('test@pharmacy.com');
+        expect(result).toHaveProperty('accessToken');
+        expect(result).toHaveProperty('refreshToken');
+        expect(result.user).not.toHaveProperty('password');
+        expect(result.user.email).toBe('test@pharmacy.com');
     });
 
     it('throws ConflictError when email already exists', async () => {
@@ -71,7 +73,7 @@ describe('AuthService.register', () => {
         const service = new AuthService(userRepo, tokenRepo);
 
         await expect(
-            service.register({ email: 'test@pharmacy.com', password: 'password123', firstName: 'John', lastName: 'Doe' }),
+            service.register({ email: 'test@pharmacy.com', password: 'password123', fullName: 'John Doe' }),
         ).rejects.toThrow(ConflictError);
     });
 });

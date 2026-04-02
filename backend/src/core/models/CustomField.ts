@@ -7,9 +7,10 @@ const customFieldSchema = new Schema<ICustomField>(
     {
         name:        { type: String, required: true, unique: true, trim: true },
         label:       { type: String, required: true, trim: true },
-        type:        { type: String, required: true, enum: ['text', 'number', 'date', 'boolean', 'file'] },
+        type:        { type: String, required: true, enum: ['text', 'textarea', 'number', 'date', 'boolean', 'file', 'dropdown'] },
         required:    { type: Boolean, default: false },
         description: { type: String, default: '' },
+        options:     [{ type: String }],
     },
     { timestamps: true },
 );

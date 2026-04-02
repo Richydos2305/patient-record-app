@@ -3,13 +3,14 @@ export interface User {
   id: string;
   email: string;
   fullName: string;
-  role: 'pharmacist';
+  role: string;
   createdAt: string;
+  updatedAt: string;
   // Business branding (optional)
   companyName?: string;
-  companyLogo?: string; // base64 encoded image
+  companyLogo?: string;
   phoneNumber?: string;
-  primaryColor?: string; // hex color code for theme
+  primaryColor?: string;
 }
 
 export interface LoginCredentials {
@@ -26,7 +27,6 @@ export interface RegisterData {
 
 export interface UpdateUserRequest {
   fullName?: string;
-  email?: string;
   phoneNumber?: string;
   companyName?: string;
   companyLogo?: string;
@@ -35,7 +35,8 @@ export interface UpdateUserRequest {
 
 export interface AuthResponse {
   user: User;
-  token: string;
+  accessToken: string;
+  refreshToken: string;
 }
 
 // Patient Types
@@ -43,16 +44,19 @@ export interface Patient {
   id: string;
   fullName: string;
   dateOfBirth: string;
-  houseAddress: string;
+  address: string;
   phoneNumber: string;
-  emergencyContact: string;
-  currentPrescriptions: Prescription[];
-  nextAppointmentDate: string;
-  pharmacistNotes: string;
-  customFields: CustomFieldValue[];
+  emergencyContact: {
+    name: string;
+    phone: string;
+    relationship: string;
+  };
+  prescriptions: Prescription[];
+  appointmentDates: string[];
+  notes?: string;
+  customFields: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
-  createdBy: string;
 }
 
 export interface Prescription {
@@ -64,35 +68,39 @@ export interface Prescription {
 }
 
 // Custom Field Types
-export type CustomFieldType = 'text' | 'textarea' | 'number' | 'date' | 'dropdown' | 'file';
+export type CustomFieldType = 'text' | 'textarea' | 'number' | 'date' | 'boolean' | 'file' | 'dropdown';
 
 export interface CustomField {
   id: string;
+  name: string;
   label: string;
   type: CustomFieldType;
   required: boolean;
-  section?: 'personal' | 'medical'; // Which section the field belongs to
-  options?: string[]; // for dropdown type
-  placeholder?: string;
+  description: string;
+  options?: string[];
 }
 
 export interface CustomFieldValue {
   fieldId: string;
   field: CustomField;
-  value: string | number | File | File[];
+  value: string | number | boolean | File | File[];
 }
 
 // API Request/Response Types
 export interface CreatePatientRequest {
   fullName: string;
   dateOfBirth: string;
-  houseAddress: string;
+  address: string;
   phoneNumber: string;
-  emergencyContact: string;
-  currentPrescriptions: Omit<Prescription, 'id'>[];
-  nextAppointmentDate: string;
-  pharmacistNotes: string;
-  customFields: CustomFieldValue[];
+  emergencyContact: {
+    name: string;
+    phone: string;
+    relationship: string;
+  };
+  prescriptions: Omit<Prescription, 'id'>[];
+  appointmentDates: string[];
+  notes?: string;
+  customFields: Record<string, unknown>;
 }
 
 export interface UpdatePatientRequest extends Partial<CreatePatientRequest> {

@@ -30,7 +30,6 @@ export function CustomFieldInput({ field, value, onChange, error }: CustomFieldI
           onChange={(e) => handleChange(e.target.value)}
           required={field.required}
           error={error}
-          placeholder={field.placeholder}
         />
       );
 
@@ -42,7 +41,6 @@ export function CustomFieldInput({ field, value, onChange, error }: CustomFieldI
           onChange={(e) => handleChange(e.target.value)}
           required={field.required}
           error={error}
-          placeholder={field.placeholder}
           rows={4}
         />
       );
@@ -56,7 +54,6 @@ export function CustomFieldInput({ field, value, onChange, error }: CustomFieldI
           onChange={(e) => handleChange(e.target.value)}
           required={field.required}
           error={error}
-          placeholder={field.placeholder}
         />
       );
 
@@ -145,6 +142,23 @@ export function CustomFieldInput({ field, value, onChange, error }: CustomFieldI
               {error}
             </p>
           )}
+        </div>
+      );
+
+    case 'boolean':
+      return (
+        <div className={styles.field}>
+          <label className={styles.label}>
+            <input
+              type="checkbox"
+              checked={!!currentValue}
+              onChange={(e) => handleChange(e.target.checked ? 'true' : 'false')}
+              required={field.required}
+            />
+            {' '}{field.label}
+            {field.required && <span className={styles.required}>*</span>}
+          </label>
+          {error && <p className={styles.error} role="alert">{error}</p>}
         </div>
       );
 

@@ -2,16 +2,21 @@ import { PatientRepository } from '../../repositories/PatientRepository';
 import { validateCreatePatientPayload, validateUpdatePatientPayload } from '../../helpers/validation';
 import { NotFoundError } from '../../errors/CustomErrors';
 import { IPatientDocument } from '../../models/Patient';
-import { CreatePatientBody, UpdatePatientBody, ListPatientsQuery } from './interface';
+import { CreatePatientBody, UpdatePatientBody, ListPatientsQuery, PaginatedPatientsResult } from './interface';
 
 export class PatientService {
     constructor(private readonly patientRepo: PatientRepository) {}
 
-    async list(query: ListPatientsQuery): Promise<IPatientDocument[]> {
-        const filter = query.search
-            ? { $text: { $search: query.search } }
-            : {};
-        return this.patientRepo.find(filter);
+    async list(query: ListPatientsQuery): Promise<PaginatedPatientsResult> {
+        const page = Math.max(1, Number(query.page) || 1);
+        const limit = Math.min(100, Math.max(1, Number(query.limit) || 20));
+        const skip = (page - 1) * limit;
+        const filter = query.search ? { $text: { $search: query.search } } : {};
+        const [patients, total] = await Promise.all([
+            this.patientRepo.find(filter, { skip, limit }),
+            this.patientRepo.countDocuments(filter),
+        ]);
+        return { patients, total, page, limit };
     }
 
     async getById(id: string): Promise<IPatientDocument> {

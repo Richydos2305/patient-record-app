@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import { ValidationError } from '../errors/CustomErrors';
 import { logger } from './logger';
-import { RegisterBody, LoginBody } from '../services/auth/interface';
+import { RegisterBody, LoginBody, UpdateProfileBody } from '../services/auth/interface';
 import { CreatePatientBody, UpdatePatientBody } from '../services/patient/interface';
 import { CreateCustomFieldBody, UpdateCustomFieldBody } from '../services/customField/interface';
 
@@ -14,10 +14,9 @@ const validate = (body: object, schema: Joi.ObjectSchema | Joi.Schema, context: 
 };
 
 export const registerSchema = Joi.object({
-    email:     Joi.string().email().required(),
-    password:  Joi.string().min(8).required(),
-    firstName: Joi.string().required(),
-    lastName:  Joi.string().required(),
+    email:    Joi.string().email().required(),
+    password: Joi.string().min(8).required(),
+    fullName: Joi.string().required(),
 });
 
 export const loginSchema = Joi.object({
@@ -33,6 +32,14 @@ export const idParamSchema = Joi.object({
     id: Joi.string().required(),
 });
 
+export const updateProfileSchema = Joi.object({
+    fullName:     Joi.string(),
+    phoneNumber:  Joi.string(),
+    companyName:  Joi.string(),
+    companyLogo:  Joi.string(),
+    primaryColor: Joi.string(),
+}).min(1);
+
 export const validateRegisterPayload = (body: RegisterBody): void => {
     validate(body, registerSchema, 'User Registration');
 };
@@ -41,36 +48,45 @@ export const validateLoginPayload = (body: LoginBody): void => {
     validate(body, loginSchema, 'User Login');
 };
 
+export const validateUpdateProfilePayload = (body: UpdateProfileBody): void => {
+    validate(body, updateProfileSchema, 'Update Profile');
+};
+
 const emergencyContactSchema = Joi.object({
     name:         Joi.string().required(),
     phone:        Joi.string().required(),
     relationship: Joi.string().required(),
 });
 
+const prescriptionSchema = Joi.object({
+    medicationName:   Joi.string().required(),
+    dosage:           Joi.string().required(),
+    frequency:        Joi.string().required(),
+    prescriptionDate: Joi.string().required(),
+});
+
 export const createPatientSchema = Joi.object({
-    firstName:        Joi.string().required(),
-    lastName:         Joi.string().required(),
+    fullName:         Joi.string().required(),
     dateOfBirth:      Joi.string().isoDate().required(),
     address:          Joi.string().required(),
-    phone:            Joi.string().required(),
+    phoneNumber:      Joi.string().required(),
     emergencyContact: emergencyContactSchema.required(),
-    prescriptions:    Joi.array().items(Joi.string()).optional(),
-    appointmentDates: Joi.array().items(Joi.string().isoDate()).optional(),
-    notes:            Joi.string().optional().allow(''),
-    customFields:     Joi.object().unknown(true).optional(),
+    prescriptions:    Joi.array().items(prescriptionSchema),
+    appointmentDates: Joi.array().items(Joi.string().isoDate()),
+    notes:            Joi.string(),
+    customFields:     Joi.object().unknown(true),
 });
 
 export const updatePatientSchema = Joi.object({
-    firstName:        Joi.string().optional(),
-    lastName:         Joi.string().optional(),
-    dateOfBirth:      Joi.string().isoDate().optional(),
-    address:          Joi.string().optional(),
-    phone:            Joi.string().optional(),
-    emergencyContact: emergencyContactSchema.optional(),
-    prescriptions:    Joi.array().items(Joi.string()).optional(),
-    appointmentDates: Joi.array().items(Joi.string().isoDate()).optional(),
-    notes:            Joi.string().optional().allow(''),
-    customFields:     Joi.object().unknown(true).optional(),
+    fullName:         Joi.string(),
+    dateOfBirth:      Joi.string().isoDate(),
+    address:          Joi.string(),
+    phoneNumber:      Joi.string(),
+    emergencyContact: emergencyContactSchema,
+    prescriptions:    Joi.array().items(prescriptionSchema),
+    appointmentDates: Joi.array().items(Joi.string().isoDate()),
+    notes:            Joi.string(),
+    customFields:     Joi.object().unknown(true),
 }).min(1);
 
 export const validateCreatePatientPayload = (body: CreatePatientBody): void => {
@@ -81,21 +97,23 @@ export const validateUpdatePatientPayload = (body: UpdatePatientBody): void => {
     validate(body, updatePatientSchema, 'Update Patient');
 };
 
-const customFieldTypeValues = ['text', 'number', 'date', 'boolean', 'file'] as const;
+const customFieldTypeValues = ['text', 'textarea', 'number', 'date', 'boolean', 'file', 'dropdown'] as const;
 
 export const createCustomFieldSchema = Joi.object({
     name:        Joi.string().required(),
     label:       Joi.string().required(),
     type:        Joi.string().valid(...customFieldTypeValues).required(),
-    required:    Joi.boolean().optional(),
-    description: Joi.string().optional().allow(''),
+    required:    Joi.boolean(),
+    description: Joi.string(),
+    options:     Joi.array().items(Joi.string()),
 });
 
 export const updateCustomFieldSchema = Joi.object({
-    label:       Joi.string().optional(),
-    type:        Joi.string().valid(...customFieldTypeValues).optional(),
-    required:    Joi.boolean().optional(),
-    description: Joi.string().optional().allow(''),
+    label:       Joi.string(),
+    type:        Joi.string().valid(...customFieldTypeValues),
+    required:    Joi.boolean(),
+    description: Joi.string(),
+    options:     Joi.array().items(Joi.string()),
 }).min(1);
 
 export const validateCreateCustomFieldPayload = (body: CreateCustomFieldBody): void => {

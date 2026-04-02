@@ -2,23 +2,22 @@ import { Request, Response, NextFunction } from 'express';
 import { ServiceFactory } from '../factories/ServiceFactory';
 import { HttpStatus } from '../constants';
 import { ResponseHandlerParams } from '../interfaces/helpers';
-import { SanitizedUser, LoginResult, RefreshResult } from '../services/auth/interface';
 
 export const register = async (
     req: Request,
     _res: Response,
     _next: NextFunction,
-): Promise<ResponseHandlerParams<SanitizedUser>> => {
+): Promise<ResponseHandlerParams> => {
     const authService = ServiceFactory.createAuthService();
-    const user = await authService.register(req.body);
-    return { status: HttpStatus.CREATED, message: 'User registered successfully', data: user };
+    const result = await authService.register(req.body);
+    return { status: HttpStatus.CREATED, message: 'User registered successfully', data: result };
 };
 
 export const login = async (
     req: Request,
     _res: Response,
     _next: NextFunction,
-): Promise<ResponseHandlerParams<LoginResult>> => {
+): Promise<ResponseHandlerParams> => {
     const authService = ServiceFactory.createAuthService();
     const result = await authService.login(req.body);
     return { status: HttpStatus.OK, message: 'Login successful', data: result };
@@ -28,7 +27,7 @@ export const refresh = async (
     req: Request,
     _res: Response,
     _next: NextFunction,
-): Promise<ResponseHandlerParams<RefreshResult>> => {
+): Promise<ResponseHandlerParams> => {
     const authService = ServiceFactory.createAuthService();
     const result = await authService.refresh(req.body.token as string);
     return { status: HttpStatus.OK, message: 'Token refreshed', data: result };

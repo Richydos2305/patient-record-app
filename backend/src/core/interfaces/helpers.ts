@@ -1,6 +1,12 @@
-export interface ResponseHandlerParams<T = undefined> {
+export interface FindOptions {
+    skip?: number;
+    limit?: number;
+    sort?: Record<string, 1 | -1>;
+}
+
+export interface ResponseHandlerParams {
     status: number;
     message: string;
-    data?: T;
+    data?: unknown;
     error?: { code: string };
 }

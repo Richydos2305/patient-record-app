@@ -31,7 +31,7 @@ export function Layout({ children }: LayoutProps) {
         message: 'Successfully logged out',
       });
       navigate('/login');
-    } catch (error) {
+    } catch {
       addToast({
         type: 'error',
         message: 'Failed to logout',

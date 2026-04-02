@@ -2,14 +2,13 @@ import { Request, Response, NextFunction } from 'express';
 import { ServiceFactory } from '../factories/ServiceFactory';
 import { HttpStatus } from '../constants';
 import { ResponseHandlerParams } from '../interfaces/helpers';
-import { IFileDocument } from '../models/File';
 import { ValidationError } from '../errors/CustomErrors';
 
 export const uploadFile = async (
     req: Request,
     _res: Response,
     _next: NextFunction,
-): Promise<ResponseHandlerParams<IFileDocument>> => {
+): Promise<ResponseHandlerParams> => {
     if (!req.file) throw new ValidationError('No file provided');
     const fileService = ServiceFactory.createFileService();
     const file = await fileService.upload(req.file, req.params.patientId);
@@ -20,7 +19,7 @@ export const listFiles = async (
     req: Request,
     _res: Response,
     _next: NextFunction,
-): Promise<ResponseHandlerParams<IFileDocument[]>> => {
+): Promise<ResponseHandlerParams> => {
     const fileService = ServiceFactory.createFileService();
     const files = await fileService.listByPatient(req.params.patientId);
     return { status: HttpStatus.OK, message: 'Files retrieved successfully', data: files };

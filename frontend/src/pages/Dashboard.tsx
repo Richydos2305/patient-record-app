@@ -10,23 +10,23 @@ import { usePatients } from '../hooks/usePatients';
 
 export function Dashboard() {
   const navigate = useNavigate();
-  const { data: patients, isLoading, error } = usePatients();
+  const { data, isLoading, error } = usePatients();
   const [searchQuery, setSearchQuery] = useState('');
 
   // Filter patients based on search query
   const filteredPatients = useMemo(() => {
-    if (!patients) return [];
-    
-    if (!searchQuery.trim()) return patients;
+    if (!data?.patients) return [];
+
+    if (!searchQuery.trim()) return data.patients;
 
     const query = searchQuery.toLowerCase();
-    return patients.filter(
+    return data.patients.filter(
       (patient) =>
         patient.fullName.toLowerCase().includes(query) ||
         patient.phoneNumber.includes(query) ||
-        patient.houseAddress.toLowerCase().includes(query)
+        patient.address.toLowerCase().includes(query)
     );
-  }, [patients, searchQuery]);
+  }, [data, searchQuery]);
 
   return (
     <Layout>
@@ -35,7 +35,7 @@ export function Dashboard() {
           <div>
             <h1 className="text-3xl font-bold text-foreground">Patient Dashboard</h1>
             <p className="mt-1 text-sm text-muted-foreground" aria-live="polite">
-              {patients?.length || 0} patient{patients?.length !== 1 ? 's' : ''} registered
+              {data?.patients?.length || 0} patient{data?.patients?.length !== 1 ? 's' : ''} registered
             </p>
           </div>
           <Button onClick={() => navigate('/patients/new')} aria-label="Add new patient">

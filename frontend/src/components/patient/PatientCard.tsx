@@ -11,8 +11,9 @@ export function PatientCard({ patient }: PatientCardProps) {
   const navigate = useNavigate();
 
   const age = calculateAge(patient.dateOfBirth);
-  const nextAppointment = new Date(patient.nextAppointmentDate);
-  const isUpcoming = nextAppointment > new Date();
+  const firstAppointmentDate = patient.appointmentDates?.[0];
+  const nextAppointment = firstAppointmentDate ? new Date(firstAppointmentDate) : null;
+  const isUpcoming = nextAppointment ? nextAppointment > new Date() : false;
 
   return (
     <Card
@@ -87,28 +88,28 @@ export function PatientCard({ patient }: PatientCardProps) {
                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
-            <span 
+            <span
               className={isUpcoming ? 'text-primary font-medium' : 'text-muted-foreground'}
-              aria-label={`Next appointment: ${formatDate(patient.nextAppointmentDate)}${isUpcoming ? ' (upcoming)' : ' (past)'}`}
+              aria-label={firstAppointmentDate ? `Next appointment: ${formatDate(firstAppointmentDate)}${isUpcoming ? ' (upcoming)' : ' (past)'}` : 'No appointment scheduled'}
             >
-              {formatDate(patient.nextAppointmentDate)}
+              {firstAppointmentDate ? formatDate(firstAppointmentDate) : 'No appointment'}
             </span>
           </div>
         </div>
 
         <div>
           <h4 className="text-sm font-medium mb-2">Current Prescriptions</h4>
-          {patient.currentPrescriptions.length > 0 ? (
+          {patient.prescriptions.length > 0 ? (
             <div className="space-y-2" aria-label="List of current prescriptions">
-              {patient.currentPrescriptions.slice(0, 2).map((rx) => (
+              {patient.prescriptions.slice(0, 2).map((rx) => (
                 <div key={rx.id} className="flex items-center justify-between">
                   <span className="text-sm font-medium">{rx.medicationName}</span>
                   <Badge variant="secondary" className="text-xs">{rx.dosage}</Badge>
                 </div>
               ))}
-              {patient.currentPrescriptions.length > 2 && (
-                <p className="text-xs text-muted-foreground" aria-label={`${patient.currentPrescriptions.length - 2} more prescriptions`}>
-                  +{patient.currentPrescriptions.length - 2} more
+              {patient.prescriptions.length > 2 && (
+                <p className="text-xs text-muted-foreground" aria-label={`${patient.prescriptions.length - 2} more prescriptions`}>
+                  +{patient.prescriptions.length - 2} more
                 </p>
               )}
             </div>

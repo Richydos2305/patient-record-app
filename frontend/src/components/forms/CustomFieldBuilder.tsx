@@ -5,7 +5,7 @@ import type { CustomField, CustomFieldType } from '../../types';
 import styles from './CustomFieldBuilder.module.css';
 
 interface CustomFieldBuilderProps {
-  onSave: (field: Omit<CustomField, 'id' | 'section'>) => void;
+  onSave: (field: Omit<CustomField, 'id'>) => void;
   onClose: () => void;
 }
 
@@ -21,8 +21,10 @@ export function CustomFieldBuilder({ onSave, onClose }: CustomFieldBuilderProps)
 
     if (!label.trim()) return;
 
-    const newField: Omit<CustomField, 'id' | 'section'> = {
+    const newField: Omit<CustomField, 'id'> = {
+      name: label.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, ''),
       label: label.trim(),
+      description: '',
       type: fieldType,
       required,
       options: fieldType === 'dropdown' ? options : undefined,
@@ -98,6 +100,7 @@ export function CustomFieldBuilder({ onSave, onClose }: CustomFieldBuilderProps)
               <option value="textarea">Text Area</option>
               <option value="number">Number</option>
               <option value="date">Date</option>
+              <option value="boolean">Yes/No (Checkbox)</option>
               <option value="dropdown">Dropdown</option>
               <option value="file">File Upload</option>
             </select>

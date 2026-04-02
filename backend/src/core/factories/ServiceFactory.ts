@@ -2,6 +2,7 @@ import { AuthService } from '../services/auth/index';
 import { PatientService } from '../services/patient/index';
 import { CustomFieldService } from '../services/customField/index';
 import { FileService } from '../services/file/index';
+import { UserService } from '../services/user/index';
 import { UserRepository } from '../repositories/UserRepository';
 import { RefreshTokenRepository } from '../repositories/RefreshTokenRepository';
 import { PatientRepository } from '../repositories/PatientRepository';
@@ -11,6 +12,10 @@ import { FileRepository } from '../repositories/FileRepository';
 export class ServiceFactory {
     static createAuthService(): AuthService {
         return new AuthService(new UserRepository(), new RefreshTokenRepository());
+    }
+
+    static createUserService(): UserService {
+        return new UserService(new UserRepository());
     }
 
     static createPatientService(): PatientService {

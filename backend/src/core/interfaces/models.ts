@@ -3,9 +3,12 @@ import { Types } from 'mongoose';
 export interface IUser {
     email: string;
     password: string;
-    firstName: string;
-    lastName: string;
+    fullName: string;
     role: string;
+    phoneNumber?: string;
+    companyName?: string;
+    companyLogo?: string;
+    primaryColor?: string;
 }
 
 export interface IRefreshToken {
@@ -18,15 +21,23 @@ export interface IRefreshToken {
 export interface ICustomField {
     name: string;
     label: string;
-    type: 'text' | 'number' | 'date' | 'boolean' | 'file';
+    type: 'text' | 'textarea' | 'number' | 'date' | 'boolean' | 'file' | 'dropdown';
     required: boolean;
     description: string;
+    options?: string[];
 }
 
 export interface IEmergencyContact {
     name: string;
     phone: string;
     relationship: string;
+}
+
+export interface IPrescription {
+    medicationName: string;
+    dosage: string;
+    frequency: string;
+    prescriptionDate: string;
 }
 
 export interface IFile {
@@ -39,13 +50,12 @@ export interface IFile {
 }
 
 export interface IPatient {
-    firstName: string;
-    lastName: string;
+    fullName: string;
     dateOfBirth: Date;
     address: string;
-    phone: string;
+    phoneNumber: string;
     emergencyContact: IEmergencyContact;
-    prescriptions: string[];
+    prescriptions: IPrescription[];
     appointmentDates: Date[];
     notes: string;
     customFields: Record<string, unknown>;

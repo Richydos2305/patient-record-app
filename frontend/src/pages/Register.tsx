@@ -55,8 +55,14 @@ export function Register() {
 
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+    } else if (!/[A-Z]/.test(formData.password)) {
+      newErrors.password = 'Password must contain at least one uppercase letter';
+    } else if (!/[0-9]/.test(formData.password)) {
+      newErrors.password = 'Password must contain at least one number';
+    } else if (!/[^A-Za-z0-9]/.test(formData.password)) {
+      newErrors.password = 'Password must contain at least one special character';
     }
 
     if (!formData.confirmPassword) {
@@ -174,11 +180,16 @@ export function Register() {
                 onChange={handleChange}
                 className={errors.password ? 'border-destructive' : ''}
                 aria-invalid={!!errors.password}
-                aria-describedby={errors.password ? 'password-error' : undefined}
+                aria-describedby={errors.password ? 'password-error' : 'password-hint'}
               />
               {errors.password && (
                 <p id="password-error" className="text-sm text-destructive" role="alert">
                   {errors.password}
+                </p>
+              )}
+              {!errors.password && (
+                <p id="password-hint" className="text-xs text-muted-foreground">
+                  Min. 8 characters, one uppercase letter, one number, one special character.
                 </p>
               )}
             </div>

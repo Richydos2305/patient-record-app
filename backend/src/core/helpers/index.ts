@@ -5,7 +5,7 @@ import { SanitizedUser } from '../services/auth/interface';
 
 export { ResponseHandlerParams };
 
-export const responseHandler = <T>(res: Response, params: ResponseHandlerParams<T>): void => {
+export const responseHandler = (res: Response, params: ResponseHandlerParams): void => {
     const success = params.status < 400;
     res.status(params.status).json(
         success
@@ -15,10 +15,18 @@ export const responseHandler = <T>(res: Response, params: ResponseHandlerParams<
 };
 
 export const sanitizeUser = (user: Document): SanitizedUser => {
-    const { password: _password, ...rest } = user.toObject();
-    return rest as SanitizedUser;
+    const obj = user.toObject() as Record<string, unknown>;
+    const { password: _password, _id, __v, ...rest } = obj;
+    return { ...rest, id: String(_id) } as SanitizedUser;
 };
 
-export const sanitizePatient = (patient: { toObject(): Record<string, unknown> }): Record<string, unknown> => {
-    return patient.toObject();
+export const sanitizePatient = (patient: Document): Record<string, unknown> => {
+    const { _id, __v, ...rest } = patient.toObject() as Record<string, unknown>;
+    const prescriptions = Array.isArray(rest.prescriptions)
+        ? (rest.prescriptions as Record<string, unknown>[]).map((p) => {
+            const { _id: pid, ...fields } = p;
+            return { ...fields, id: String(pid) };
+        })
+        : rest.prescriptions;
+    return { ...rest, id: String(_id), prescriptions };
 };

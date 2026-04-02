@@ -10,11 +10,7 @@ import { Dashboard } from './pages/Dashboard';
 import { PatientForm } from './pages/PatientForm';
 import { Profile } from './pages/Profile';
 import { Toast } from './components/ui/Toast';
-import { initializeMockData } from './services/mockApi';
 import './App.css';
-
-// Initialize mock data
-initializeMockData();
 
 function App() {
   return (
