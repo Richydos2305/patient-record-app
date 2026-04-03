@@ -46,11 +46,6 @@ export interface Patient {
   dateOfBirth: string;
   address: string;
   phoneNumber: string;
-  emergencyContact: {
-    name: string;
-    phone: string;
-    relationship: string;
-  };
   prescriptions: Prescription[];
   appointmentDates: string[];
   notes?: string;
@@ -92,11 +87,6 @@ export interface CreatePatientRequest {
   dateOfBirth: string;
   address: string;
   phoneNumber: string;
-  emergencyContact: {
-    name: string;
-    phone: string;
-    relationship: string;
-  };
   prescriptions: Omit<Prescription, 'id'>[];
   appointmentDates: string[];
   notes?: string;

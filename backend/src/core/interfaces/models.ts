@@ -27,12 +27,6 @@ export interface ICustomField {
     options?: string[];
 }
 
-export interface IEmergencyContact {
-    name: string;
-    phone: string;
-    relationship: string;
-}
-
 export interface IPrescription {
     medicationName: string;
     dosage: string;
@@ -55,7 +49,6 @@ export interface IPatient {
     dateOfBirth: Date;
     address: string;
     phoneNumber: string;
-    emergencyContact: IEmergencyContact;
     prescriptions: IPrescription[];
     appointmentDates: Date[];
     notes: string;

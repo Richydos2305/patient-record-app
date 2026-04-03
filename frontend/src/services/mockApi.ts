@@ -120,7 +120,6 @@ export const patientApi = {
       dateOfBirth: data.dateOfBirth,
       address: data.address,
       phoneNumber: data.phoneNumber,
-      emergencyContact: data.emergencyContact,
       prescriptions: (data.prescriptions || []).map(p => ({ ...p, id: generateId() })),
       appointmentDates: data.appointmentDates,
       ...(data.notes ? { notes: data.notes } : {}),
@@ -181,7 +180,6 @@ export const initializeMockData = () => {
         dateOfBirth: '1985-03-15',
         address: '123 Main St, Anytown, ST 12345',
         phoneNumber: '(555) 123-4567',
-        emergencyContact: { name: 'Jane Doe', phone: '(555) 987-6543', relationship: 'Spouse' },
         prescriptions: [
           {
             id: 'rx-1',
@@ -203,7 +201,6 @@ export const initializeMockData = () => {
         dateOfBirth: '1972-07-22',
         address: '456 Oak Ave, Springfield, ST 67890',
         phoneNumber: '(555) 234-5678',
-        emergencyContact: { name: 'Robert Smith', phone: '(555) 876-5432', relationship: 'Spouse' },
         prescriptions: [
           {
             id: 'rx-2',

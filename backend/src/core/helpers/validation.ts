@@ -52,12 +52,6 @@ export const validateUpdateProfilePayload = (body: UpdateProfileBody): void => {
     validate(body, updateProfileSchema, 'Update Profile');
 };
 
-const emergencyContactSchema = Joi.object({
-    name:         Joi.string().required(),
-    phone:        Joi.string().required(),
-    relationship: Joi.string().required(),
-});
-
 const prescriptionSchema = Joi.object({
     medicationName:   Joi.string().required(),
     dosage:           Joi.string().required(),
@@ -66,11 +60,10 @@ const prescriptionSchema = Joi.object({
 });
 
 export const createPatientSchema = Joi.object({
-    fullName:         Joi.string().required(),
-    dateOfBirth:      Joi.string().isoDate().required(),
-    address:          Joi.string().required(),
-    phoneNumber:      Joi.string().required(),
-    emergencyContact: emergencyContactSchema.required(),
+    fullName:    Joi.string().required(),
+    dateOfBirth: Joi.string().isoDate().required(),
+    address:     Joi.string().required(),
+    phoneNumber: Joi.string().required(),
     prescriptions:    Joi.array().items(prescriptionSchema),
     appointmentDates: Joi.array().items(Joi.string().isoDate()),
     notes:            Joi.string(),
@@ -78,11 +71,10 @@ export const createPatientSchema = Joi.object({
 });
 
 export const updatePatientSchema = Joi.object({
-    fullName:         Joi.string(),
-    dateOfBirth:      Joi.string().isoDate(),
-    address:          Joi.string(),
-    phoneNumber:      Joi.string(),
-    emergencyContact: emergencyContactSchema,
+    fullName:    Joi.string(),
+    dateOfBirth: Joi.string().isoDate(),
+    address:     Joi.string(),
+    phoneNumber: Joi.string(),
     prescriptions:    Joi.array().items(prescriptionSchema),
     appointmentDates: Joi.array().items(Joi.string().isoDate()),
     notes:            Joi.string(),

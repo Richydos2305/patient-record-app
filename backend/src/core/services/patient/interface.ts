@@ -1,4 +1,4 @@
-import { IEmergencyContact, IPrescription } from '../../interfaces/models';
+import { IPrescription } from '../../interfaces/models';
 import { IPatientDocument } from '../../models/Patient';
 
 export interface CreatePatientBody {
@@ -6,7 +6,6 @@ export interface CreatePatientBody {
     dateOfBirth: string;
     address: string;
     phoneNumber: string;
-    emergencyContact: IEmergencyContact;
     prescriptions?: IPrescription[];
     appointmentDates?: string[];
     notes?: string;
@@ -18,7 +17,6 @@ export interface UpdatePatientBody {
     dateOfBirth?: string;
     address?: string;
     phoneNumber?: string;
-    emergencyContact?: Partial<IEmergencyContact>;
     prescriptions?: IPrescription[];
     appointmentDates?: string[];
     notes?: string;

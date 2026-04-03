@@ -12,11 +12,6 @@ export const patientFormSchema = z.object({
   dateOfBirth: z.string().min(1, 'Date of birth is required'),
   address: z.string().min(5, 'Address must be at least 5 characters'),
   phoneNumber: z.string().min(10, 'Phone number must be at least 10 characters'),
-  emergencyContact: z.object({
-    name: z.string().min(1, 'Emergency contact name is required'),
-    phone: z.string().min(1, 'Emergency contact phone is required'),
-    relationship: z.string().min(1, 'Emergency contact relationship is required'),
-  }),
   appointmentDates: z
     .array(z.object({ date: z.string().min(1, 'Date is required') }))
     .min(1, 'At least one appointment date is required'),

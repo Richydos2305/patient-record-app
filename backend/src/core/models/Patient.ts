@@ -20,11 +20,6 @@ const patientSchema = new Schema<IPatient>(
         dateOfBirth: { type: Date, required: true },
         address:     { type: String, required: true, trim: true },
         phoneNumber: { type: String, required: true, trim: true },
-        emergencyContact: {
-            name:         { type: String, required: true, trim: true },
-            phone:        { type: String, required: true, trim: true },
-            relationship: { type: String, required: true, trim: true },
-        },
         prescriptions:    [prescriptionSchema],
         appointmentDates: [{ type: Date }],
         notes:            { type: String, default: '' },

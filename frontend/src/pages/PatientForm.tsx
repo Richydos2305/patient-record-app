@@ -50,7 +50,6 @@ export function PatientForm() {
       dateOfBirth: '',
       address: '',
       phoneNumber: '',
-      emergencyContact: { name: '', phone: '', relationship: '' },
       appointmentDates: [{ date: '' }],
       notes: '',
       prescriptions: [],
@@ -76,7 +75,6 @@ export function PatientForm() {
         dateOfBirth: toDateInput(patient.dateOfBirth),
         address: patient.address,
         phoneNumber: patient.phoneNumber,
-        emergencyContact: patient.emergencyContact,
         appointmentDates: patient.appointmentDates.map((d) => ({ date: toDateInput(d) })),
         notes: patient.notes || '',
         prescriptions: patient.prescriptions.map((rx) => ({
@@ -103,7 +101,6 @@ export function PatientForm() {
         dateOfBirth: data.dateOfBirth,
         address: data.address,
         phoneNumber: data.phoneNumber,
-        emergencyContact: data.emergencyContact,
         prescriptions: data.prescriptions || [],
         appointmentDates: data.appointmentDates.map((a) => a.date),
         ...(data.notes ? { notes: data.notes } : {}),
@@ -263,27 +260,7 @@ export function PatientForm() {
                   placeholder="+234 (803) 000-0000"
                   required
                 />
-                <Input
-                  label="Emergency Contact Name"
-                  {...register('emergencyContact.name')}
-                  error={errors.emergencyContact?.name?.message}
-                  placeholder="Contact full name"
-                  required
-                />
-                <Input
-                  label="Emergency Contact Phone"
-                  {...register('emergencyContact.phone')}
-                  error={errors.emergencyContact?.phone?.message}
-                  placeholder="Contact phone number"
-                  required
-                />
-                <Input
-                  label="Emergency Contact Relationship"
-                  {...register('emergencyContact.relationship')}
-                  error={errors.emergencyContact?.relationship?.message}
-                  placeholder="e.g., Spouse, Parent"
-                  required
-                />
+
               </div>
               
               <Input
