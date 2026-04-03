@@ -15,6 +15,7 @@ const prescriptionSchema = new Schema(
 
 const patientSchema = new Schema<IPatient>(
     {
+        userId:      { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
         fullName:    { type: String, required: true, trim: true },
         dateOfBirth: { type: Date, required: true },
         address:     { type: String, required: true, trim: true },

@@ -7,6 +7,10 @@ import { filesRouter } from './files';
 
 export const router = Router();
 
+router.get('/api/health', (_req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 router.use('/api/auth', authRouter);
 router.use('/api/users', usersRouter);
 router.use('/api/patients', patientsRouter);

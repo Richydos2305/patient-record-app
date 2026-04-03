@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
@@ -25,7 +26,7 @@ export class AuthService {
         const refreshToken = jwt.sign(
             { id: userId },
             settings.jwtRefreshSecret,
-            { expiresIn: '7d' },
+            { expiresIn: '7d', jwtid: randomUUID() },
         );
         const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
         await this.tokenRepo.create({

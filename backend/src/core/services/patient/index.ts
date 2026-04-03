@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import { PatientRepository } from '../../repositories/PatientRepository';
 import { validateCreatePatientPayload, validateUpdatePatientPayload } from '../../helpers/validation';
 import { NotFoundError } from '../../errors/CustomErrors';
@@ -7,11 +8,13 @@ import { CreatePatientBody, UpdatePatientBody, ListPatientsQuery, PaginatedPatie
 export class PatientService {
     constructor(private readonly patientRepo: PatientRepository) {}
 
-    async list(query: ListPatientsQuery): Promise<PaginatedPatientsResult> {
+    async list(query: ListPatientsQuery, userId: string): Promise<PaginatedPatientsResult> {
         const page = Math.max(1, Number(query.page) || 1);
         const limit = Math.min(100, Math.max(1, Number(query.limit) || 20));
         const skip = (page - 1) * limit;
-        const filter = query.search ? { $text: { $search: query.search } } : {};
+        const filter = query.search
+            ? { userId, $text: { $search: query.search } }
+            : { userId };
         const [patients, total] = await Promise.all([
             this.patientRepo.find(filter, { skip, limit }),
             this.patientRepo.countDocuments(filter),
@@ -19,23 +22,26 @@ export class PatientService {
         return { patients, total, page, limit };
     }
 
-    async getById(id: string): Promise<IPatientDocument> {
-        const patient = await this.patientRepo.findOne({ _id: id });
+    async getById(id: string, userId: string): Promise<IPatientDocument> {
+        const patient = await this.patientRepo.findOne({ _id: id, userId });
         if (!patient) throw new NotFoundError('Patient not found');
         return patient;
     }
 
-    async create(body: CreatePatientBody): Promise<IPatientDocument> {
+    async create(body: CreatePatientBody, userId: string): Promise<IPatientDocument> {
         validateCreatePatientPayload(body);
         return this.patientRepo.create({
             ...body,
+            userId: new Types.ObjectId(userId),
             dateOfBirth: new Date(body.dateOfBirth),
             appointmentDates: body.appointmentDates?.map((d) => new Date(d)),
         });
     }
 
-    async update(id: string, body: UpdatePatientBody): Promise<IPatientDocument> {
+    async update(id: string, body: UpdatePatientBody, userId: string): Promise<IPatientDocument> {
         validateUpdatePatientPayload(body);
+        const existing = await this.patientRepo.findOne({ _id: id, userId });
+        if (!existing) throw new NotFoundError('Patient not found');
         const update = {
             ...body,
             ...(body.dateOfBirth && { dateOfBirth: new Date(body.dateOfBirth) }),
@@ -46,9 +52,9 @@ export class PatientService {
         return patient;
     }
 
-    async delete(id: string): Promise<void> {
-        const patient = await this.patientRepo.findOne({ _id: id });
+    async delete(id: string, userId: string): Promise<void> {
+        const patient = await this.patientRepo.findOne({ _id: id, userId });
         if (!patient) throw new NotFoundError('Patient not found');
-        await this.patientRepo.deleteOne({ _id: id });
+        await this.patientRepo.deleteOne({ _id: id, userId });
     }
 }

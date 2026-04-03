@@ -6,11 +6,12 @@ import { sanitizePatient } from '../helpers/index';
 
 export const listPatients = async (
     req: Request,
-    _res: Response,
+    res: Response,
     _next: NextFunction,
 ): Promise<ResponseHandlerParams> => {
     const patientService = ServiceFactory.createPatientService();
-    const { patients, total, page, limit } = await patientService.list(req.query);
+    const userId = res.locals.user.id as string;
+    const { patients, total, page, limit } = await patientService.list(req.query, userId);
     return {
         status: HttpStatus.OK,
         message: 'Patients retrieved successfully',
@@ -20,40 +21,44 @@ export const listPatients = async (
 
 export const getPatient = async (
     req: Request,
-    _res: Response,
+    res: Response,
     _next: NextFunction,
 ): Promise<ResponseHandlerParams> => {
     const patientService = ServiceFactory.createPatientService();
-    const patient = await patientService.getById(req.params.id);
+    const userId = res.locals.user.id as string;
+    const patient = await patientService.getById(req.params.id, userId);
     return { status: HttpStatus.OK, message: 'Patient retrieved successfully', data: sanitizePatient(patient) };
 };
 
 export const createPatient = async (
     req: Request,
-    _res: Response,
+    res: Response,
     _next: NextFunction,
 ): Promise<ResponseHandlerParams> => {
     const patientService = ServiceFactory.createPatientService();
-    const patient = await patientService.create(req.body);
+    const userId = res.locals.user.id as string;
+    const patient = await patientService.create(req.body, userId);
     return { status: HttpStatus.CREATED, message: 'Patient created successfully', data: sanitizePatient(patient) };
 };
 
 export const updatePatient = async (
     req: Request,
-    _res: Response,
+    res: Response,
     _next: NextFunction,
 ): Promise<ResponseHandlerParams> => {
     const patientService = ServiceFactory.createPatientService();
-    const patient = await patientService.update(req.params.id, req.body);
+    const userId = res.locals.user.id as string;
+    const patient = await patientService.update(req.params.id, req.body, userId);
     return { status: HttpStatus.OK, message: 'Patient updated successfully', data: sanitizePatient(patient) };
 };
 
 export const deletePatient = async (
     req: Request,
-    _res: Response,
+    res: Response,
     _next: NextFunction,
 ): Promise<ResponseHandlerParams> => {
     const patientService = ServiceFactory.createPatientService();
-    await patientService.delete(req.params.id);
+    const userId = res.locals.user.id as string;
+    await patientService.delete(req.params.id, userId);
     return { status: HttpStatus.OK, message: 'Patient deleted successfully' };
 };

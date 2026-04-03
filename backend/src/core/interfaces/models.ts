@@ -50,6 +50,7 @@ export interface IFile {
 }
 
 export interface IPatient {
+    userId: Types.ObjectId;
     fullName: string;
     dateOfBirth: Date;
     address: string;

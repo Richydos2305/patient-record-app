@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { User, LoginCredentials, RegisterData, UpdateUserRequest } from '../types';
 import { authApi } from '../services/api';
 import axios from 'axios';
@@ -22,6 +22,10 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Module-level flag: prevents React StrictMode's double-invocation of useEffect
+// from sending two simultaneous refresh requests with the same token.
+let sessionRefreshAttempted = false;
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
     const storedUser = localStorage.getItem('user');
@@ -35,7 +39,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     return null;
   });
-  const [isLoading] = useState(false);
+  // Start loading if we have a refresh token to attempt silent re-auth
+  const [isLoading, setIsLoading] = useState(() => !!localStorage.getItem('refreshToken'));
+
+  // On mount: silently refresh credentials so returning users aren't forced to log in again
+  useEffect(() => {
+    const refreshToken = localStorage.getItem('refreshToken');
+    // No token → nothing to refresh; isLoading was never set true so no state change needed.
+    if (!refreshToken) return;
+    // Already in flight (React StrictMode fires effects twice in dev) — let the
+    // first request handle state; don't send a duplicate request.
+    if (sessionRefreshAttempted) return;
+    sessionRefreshAttempted = true;
+
+    authApi.refresh(refreshToken)
+      .then(({ accessToken, refreshToken: newRefreshToken }) => {
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', newRefreshToken);
+        // Fetch fresh user profile so state is up-to-date
+        return authApi.getProfile();
+      })
+      .then((freshUser) => {
+        localStorage.setItem('user', JSON.stringify(freshUser));
+        setUser(freshUser);
+      })
+      .catch(() => {
+        // Refresh token is invalid/expired — clear everything and force login
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        setUser(null);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const login = async (credentials: LoginCredentials) => {
     try {
