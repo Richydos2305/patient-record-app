@@ -12,10 +12,8 @@ import { logger } from './core/helpers/logger';
 const app = express();
 
 app.use(helmet());
-app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-    credentials: true,
-}));
+// TODO: Restrict CORS before going to production
+app.use(cors());
 app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
