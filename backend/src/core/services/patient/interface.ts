@@ -3,7 +3,7 @@ import { IPatientDocument } from '../../models/Patient';
 
 export interface CreatePatientBody {
     fullName: string;
-    dateOfBirth: string;
+    age: number;
     address: string;
     phoneNumber: string;
     prescriptions?: IPrescription[];
@@ -14,7 +14,7 @@ export interface CreatePatientBody {
 
 export interface UpdatePatientBody {
     fullName?: string;
-    dateOfBirth?: string;
+    age?: number;
     address?: string;
     phoneNumber?: string;
     prescriptions?: IPrescription[];

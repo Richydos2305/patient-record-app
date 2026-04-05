@@ -60,10 +60,10 @@ const prescriptionSchema = Joi.object({
 });
 
 export const createPatientSchema = Joi.object({
-    fullName:    Joi.string().required(),
-    dateOfBirth: Joi.string().isoDate().required(),
-    address:     Joi.string().required(),
-    phoneNumber: Joi.string().required(),
+    fullName:         Joi.string().required(),
+    age:              Joi.number().integer().min(0).max(150).required(),
+    address:          Joi.string().required(),
+    phoneNumber:      Joi.string().required(),
     prescriptions:    Joi.array().items(prescriptionSchema),
     appointmentDates: Joi.array().items(Joi.string().isoDate()),
     notes:            Joi.string(),
@@ -71,10 +71,10 @@ export const createPatientSchema = Joi.object({
 });
 
 export const updatePatientSchema = Joi.object({
-    fullName:    Joi.string(),
-    dateOfBirth: Joi.string().isoDate(),
-    address:     Joi.string(),
-    phoneNumber: Joi.string(),
+    fullName:         Joi.string(),
+    age:              Joi.number().integer().min(0).max(150),
+    address:          Joi.string(),
+    phoneNumber:      Joi.string(),
     prescriptions:    Joi.array().items(prescriptionSchema),
     appointmentDates: Joi.array().items(Joi.string().isoDate()),
     notes:            Joi.string(),

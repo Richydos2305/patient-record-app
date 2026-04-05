@@ -1,0 +1,83 @@
+export interface IUser {
+  _id: string;
+  email: string;
+  fullName: string;
+  role: string;
+  phoneNumber?: string;
+  companyName?: string;
+  companyLogo?: string;
+  primaryColor?: string;
+}
+
+export interface IPrescription {
+  medicationName: string;
+  dosage: string;
+  frequency: string;
+  prescriptionDate: string;
+}
+
+export interface IPatient {
+  id: string;
+  userId: string;
+  fullName: string;
+  age: number;
+  address: string;
+  phoneNumber: string;
+  prescriptions: IPrescription[];
+  appointmentDates: string[];
+  notes: string;
+  customFields: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ICustomFieldDef {
+  _id?: string;
+  name: string;
+  label: string;
+  type: 'text' | 'textarea' | 'number' | 'date' | 'boolean' | 'file' | 'dropdown';
+  required: boolean;
+  description: string;
+  options?: string[];
+}
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+export interface RegisterPayload {
+  email: string;
+  password: string;
+  fullName: string;
+}
+
+export interface CreatePatientPayload {
+  fullName: string;
+  age: number;
+  address: string;
+  phoneNumber: string;
+  prescriptions: IPrescription[];
+  appointmentDates: string[];
+  notes: string;
+  customFields?: Record<string, unknown>;
+}
+
+export type UpdatePatientPayload = Partial<CreatePatientPayload>;
+
+export interface PaginatedPatients {
+  patients: IPatient[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface ApiError {
+  message: string;
+  status?: number;
+}

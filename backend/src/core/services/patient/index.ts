@@ -33,7 +33,6 @@ export class PatientService {
         return this.patientRepo.create({
             ...body,
             userId: new Types.ObjectId(userId),
-            dateOfBirth: new Date(body.dateOfBirth),
             appointmentDates: body.appointmentDates?.map((d) => new Date(d)),
         });
     }
@@ -44,7 +43,6 @@ export class PatientService {
         if (!existing) throw new NotFoundError('Patient not found');
         const update = {
             ...body,
-            ...(body.dateOfBirth && { dateOfBirth: new Date(body.dateOfBirth) }),
             ...(body.appointmentDates && { appointmentDates: body.appointmentDates.map((d) => new Date(d)) }),
         };
         const patient = await this.patientRepo.updateOne(id, update, { new: true });
