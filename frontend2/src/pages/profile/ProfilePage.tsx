@@ -18,6 +18,8 @@ export function ProfilePage() {
   const [companyName, setCompanyName] = useState('');
   const [error, setError] = useState('');
   const [saveLoading, setSaveLoading] = useState(false);
+  const [editingPharmacy, setEditingPharmacy] = useState(false);
+  const [pharmacyError, setPharmacyError] = useState('');
 
   const updateMutation = useMutation({
     mutationFn: updateMe,
@@ -35,9 +37,28 @@ export function ProfilePage() {
     setFullName(user?.fullName ?? '');
     setEmail(user?.email ?? '');
     setPhoneNumber(user?.phoneNumber ?? '');
-    setCompanyName(user?.companyName ?? '');
     setError('');
     setEditing(true);
+  }
+
+  function startEditPharmacy() {
+    setCompanyName(user?.companyName ?? '');
+    setPharmacyError('');
+    setEditingPharmacy(true);
+  }
+
+  async function handleSavePharmacy(e: React.FormEvent) {
+    e.preventDefault();
+    setPharmacyError('');
+    setSaveLoading(true);
+    try {
+      await updateMutation.mutateAsync({ companyName });
+      setEditingPharmacy(false);
+    } catch {
+      // error handled in mutation onError
+    } finally {
+      setSaveLoading(false);
+    }
   }
 
   async function handleSave(e: React.FormEvent) {
@@ -45,7 +66,7 @@ export function ProfilePage() {
     setError('');
     setSaveLoading(true);
     try {
-      await updateMutation.mutateAsync({ fullName, phoneNumber, companyName });
+      await updateMutation.mutateAsync({ fullName, phoneNumber });
     } finally {
       setSaveLoading(false);
     }
@@ -151,6 +172,21 @@ export function ProfilePage() {
         <div className="card">
           <div className="card-header">
             <h3>Pharmacy Details</h3>
+            {editingPharmacy ? (
+              <div className="profile-edit-actions">
+                <span className="edit-link" onClick={() => setEditingPharmacy(false)}>Cancel</span>
+                <button
+                  className="btn-save"
+                  style={{ padding: '6px 16px', fontSize: 13 }}
+                  onClick={handleSavePharmacy}
+                  disabled={saveLoading}
+                >
+                  {saveLoading ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            ) : (
+              <span className="edit-link" onClick={startEditPharmacy}>Edit</span>
+            )}
           </div>
           <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
@@ -163,20 +199,33 @@ export function ProfilePage() {
                     companyInitials
                   )}
                 </div>
-                <button className="upload-btn" type="button">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="16 16 12 12 8 16"/>
-                    <line x1="12" y1="12" x2="12" y2="21"/>
-                    <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
-                  </svg>
-                  Upload Logo
-                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <button className="upload-btn" type="button" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="16 16 12 12 8 16"/>
+                      <line x1="12" y1="12" x2="12" y2="21"/>
+                      <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+                    </svg>
+                    Upload Logo
+                  </button>
+                  <span style={{ fontSize: 11, color: 'var(--fg-muted)' }}>Coming soon</span>
+                </div>
               </div>
             </div>
-            <div className="field-row" style={{ paddingTop: 0 }}>
-              <span className="field-label">Pharmacy Name</span>
-              <span className="field-value">{user?.companyName ?? '—'}</span>
-            </div>
+            {editingPharmacy ? (
+              <>
+                {pharmacyError && <div className="error-banner">{pharmacyError}</div>}
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label">Pharmacy Name</label>
+                  <input className="form-input" type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+                </div>
+              </>
+            ) : (
+              <div className="field-row" style={{ paddingTop: 0 }}>
+                <span className="field-label">Pharmacy Name</span>
+                <span className="field-value">{user?.companyName ?? '—'}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
