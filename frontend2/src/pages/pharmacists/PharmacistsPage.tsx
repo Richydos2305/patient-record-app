@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { listPharmacists, createPharmacist, updatePharmacist, deletePharmacist } from '../../api/pharmacists';
 import { listPatients } from '../../api/patients';
@@ -27,13 +27,17 @@ interface PharmacistModalProps {
 }
 
 function PharmacistModal({ open, title, subtitle, initialName = '', initialPhone = '', loading, error, onClose, onSave }: PharmacistModalProps) {
-  const [name, setName] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [name, setName] = useState(initialName);
+  const [phoneNumber, setPhoneNumber] = useState(initialPhone);
 
-  if (open && (name !== initialName || phoneNumber !== initialPhone)) {
-    setName(initialName);
-    setPhoneNumber(initialPhone);
-  }
+  useEffect(() => {
+    if (open) {
+      setName(initialName);
+      setPhoneNumber(initialPhone);
+    }
+    // Only reset when the modal opens, not on every prop change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
