@@ -8,7 +8,7 @@ const userSchema = new Schema<IUser>(
         email:        { type: String, required: true, unique: true, lowercase: true, trim: true },
         password:     { type: String, required: true },
         fullName:     { type: String, required: true, trim: true },
-        role:         { type: String, default: 'pharmacist' },
+        role:         { type: String, default: 'Owner' },
         phoneNumber:  { type: String },
         companyName:  { type: String },
         companyLogo:  { type: String },

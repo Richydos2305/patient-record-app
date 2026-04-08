@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import type { IPrescription } from '../types';
+import type { IPrescription, IPharmacist } from '../types';
 
 export interface CustomFieldEntry {
   id: string;
@@ -13,6 +13,7 @@ export interface PatientFormValues {
   age: string;
   phoneNumber: string;
   address: string;
+  pharmacistName: string;
   appointmentDate: string;
   notes: string;
   prescriptions: IPrescription[];
@@ -26,6 +27,8 @@ interface PatientFormProps {
   submitLabel: string;
   loading: boolean;
   error?: string;
+  pharmacists?: IPharmacist[];
+  isUpdate?: boolean;
 }
 
 const today = new Date().toISOString().slice(0, 10);
@@ -35,13 +38,14 @@ const DEFAULT_VALUES: PatientFormValues = {
   age: '',
   phoneNumber: '',
   address: '',
+  pharmacistName: '',
   appointmentDate: '',
   notes: '',
   prescriptions: [{ medicationName: '', dosage: '', frequency: '', prescriptionDate: today }],
   customFields: [],
 };
 
-export function PatientForm({ initialValues, onSubmit, onCancel, submitLabel, loading, error }: PatientFormProps) {
+export function PatientForm({ initialValues, onSubmit, onCancel, submitLabel, loading, error, pharmacists = [], isUpdate = false }: PatientFormProps) {
   const [values, setValues] = useState<PatientFormValues>({ ...DEFAULT_VALUES, ...initialValues });
   const rxContainerRef = useRef<HTMLDivElement>(null);
   const shouldFocusLastRx = useRef(false);
@@ -164,6 +168,32 @@ export function PatientForm({ initialValues, onSubmit, onCancel, submitLabel, lo
                 onChange={(e) => set('address', e.target.value)}
               />
             </div>
+          </div>
+
+          {/* Attended To By */}
+          <div className="form-group" style={{ margin: '8px 0 0' }}>
+            <label className="form-label" htmlFor="pharmacistName">Attended To By</label>
+            {isUpdate ? (
+              <div className="locked-input">
+                <span>{values.pharmacistName || '—'}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              </div>
+            ) : (
+              <select
+                id="pharmacistName"
+                className={`form-select${!values.pharmacistName ? ' placeholder' : ''}`}
+                value={values.pharmacistName}
+                onChange={(e) => set('pharmacistName', e.target.value)}
+              >
+                <option value="">Select pharmacist...</option>
+                {pharmacists.map((p) => (
+                  <option key={p.id} value={p.name}>{p.name}</option>
+                ))}
+              </select>
+            )}
           </div>
 
           {/* Custom fields (personal section) */}

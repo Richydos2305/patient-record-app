@@ -65,6 +65,7 @@ export function UpdatePatientPage() {
         age: String(patient.age),
         phoneNumber: patient.phoneNumber,
         address: patient.address,
+        pharmacistName: patient.pharmacistName ?? '',
         appointmentDate:
           patient.appointmentDates?.length
             ? new Date(patient.appointmentDates[patient.appointmentDates.length - 1])
@@ -142,6 +143,7 @@ export function UpdatePatientPage() {
       <PatientForm
         key={patient.id}
         initialValues={initialValues}
+        isUpdate={true}
         onSubmit={handleSubmit}
         onCancel={() => navigate('/patients')}
         submitLabel="Update Patient"

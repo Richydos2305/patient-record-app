@@ -9,6 +9,7 @@ import { PatientsPage } from './pages/patients/PatientsPage';
 import { CreatePatientPage } from './pages/patients/CreatePatientPage';
 import { UpdatePatientPage } from './pages/patients/UpdatePatientPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
+import { PharmacistsPage } from './pages/pharmacists/PharmacistsPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,6 +29,7 @@ export default function App() {
             <Route path="/patients" element={<ProtectedRoute><PatientsPage /></ProtectedRoute>} />
             <Route path="/patients/new" element={<ProtectedRoute><CreatePatientPage /></ProtectedRoute>} />
             <Route path="/patients/:id" element={<ProtectedRoute><UpdatePatientPage /></ProtectedRoute>} />
+            <Route path="/pharmacists" element={<ProtectedRoute><PharmacistsPage /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>

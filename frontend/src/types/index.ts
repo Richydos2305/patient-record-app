@@ -43,7 +43,7 @@ export interface AuthResponse {
 export interface Patient {
   id: string;
   fullName: string;
-  dateOfBirth: string;
+  age: number;
   address: string;
   phoneNumber: string;
   prescriptions: Prescription[];
@@ -84,7 +84,7 @@ export interface CustomFieldValue {
 // API Request/Response Types
 export interface CreatePatientRequest {
   fullName: string;
-  dateOfBirth: string;
+  age: number;
   address: string;
   phoneNumber: string;
   prescriptions: Omit<Prescription, 'id'>[];

@@ -35,7 +35,9 @@ export function DashboardPage() {
     queryFn: () => listPatients(),
   });
 
-  const recentPatients = patients.slice(0, 3);
+  const recentPatients = [...patients]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 3);
   const total = patients.length;
   const firstName = user?.fullName?.split(' ')[0] ?? 'there';
 
@@ -118,9 +120,20 @@ export function DashboardPage() {
                   Last appointment: {formatDate(p.appointmentDates[p.appointmentDates.length - 1])}
                 </div>
               )}
+              {p.pharmacistName && (
+                <div className="attended-row">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <polyline points="16 11 18 13 22 9"/>
+                  </svg>
+                  Attended to by {p.pharmacistName}
+                </div>
+              )}
               <button className="btn-outline" onClick={() => navigate(`/patients/${p.id}`)}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
                 </svg>
                 View Patient
               </button>

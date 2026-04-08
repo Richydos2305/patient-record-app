@@ -9,7 +9,6 @@ import { CustomFieldBuilder } from '../components/forms/CustomFieldBuilder';
 import { CustomFieldInput } from '../components/forms/CustomFieldInput';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Loading } from '../components/ui/Loading';
 import { useToast } from '../contexts/ToastContext';
 import { usePatient, useCreatePatient, useUpdatePatient } from '../hooks/usePatients';
@@ -41,18 +40,20 @@ export function PatientForm() {
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<PatientFormData>({
     resolver: zodResolver(patientFormSchema),
     defaultValues: {
       fullName: '',
-      dateOfBirth: '',
+      age: undefined,
       address: '',
       phoneNumber: '',
       appointmentDates: [{ date: '' }],
       notes: '',
-      prescriptions: [],
+      // Start with one blank row so the table is visible immediately
+      prescriptions: [{ medicationName: '', dosage: '', frequency: '', prescriptionDate: '' }],
     },
   });
 
@@ -60,6 +61,26 @@ export function PatientForm() {
     control,
     name: 'prescriptions',
   });
+
+  // Auto-grow: subscribe to form changes and append a blank row when the last row has data
+  useEffect(() => {
+    const subscription = watch((value) => {
+      const rows = value.prescriptions ?? [];
+      const last = rows[rows.length - 1];
+      const lastHasData = last && (
+        last.medicationName || last.dosage || last.frequency || last.prescriptionDate
+      );
+      if (lastHasData) {
+        appendPrescription({ medicationName: '', dosage: '', frequency: '', prescriptionDate: '' });
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, appendPrescription]);
+
+  const handleRemovePrescriptionRow = useCallback((index: number) => {
+    if (prescriptionFields.length <= 1) return;
+    removePrescription(index);
+  }, [prescriptionFields.length, removePrescription]);
 
   const { fields: appointmentFields, append: appendAppointment, remove: removeAppointment } = useFieldArray({
     control,
@@ -72,7 +93,7 @@ export function PatientForm() {
       const toDateInput = (iso: string) => iso.split('T')[0];
       reset({
         fullName: patient.fullName,
-        dateOfBirth: toDateInput(patient.dateOfBirth),
+        age: patient.age,
         address: patient.address,
         phoneNumber: patient.phoneNumber,
         appointmentDates: patient.appointmentDates.map((d) => ({ date: toDateInput(d) })),
@@ -96,12 +117,17 @@ export function PatientForm() {
         customFieldsMap[field.name] = value?.value ?? '';
       });
 
+      // Strip any prescription rows where all fields are empty
+      const filledPrescriptions = (data.prescriptions ?? []).filter(
+        (rx) => rx.medicationName || rx.dosage || rx.frequency || rx.prescriptionDate,
+      ) as CreatePatientRequest['prescriptions'];
+
       const patientData: CreatePatientRequest = {
         fullName: data.fullName,
-        dateOfBirth: data.dateOfBirth,
+        age: data.age,
         address: data.address,
         phoneNumber: data.phoneNumber,
-        prescriptions: data.prescriptions || [],
+        prescriptions: filledPrescriptions,
         appointmentDates: data.appointmentDates.map((a) => a.date),
         ...(data.notes ? { notes: data.notes } : {}),
         customFields: customFieldsMap,
@@ -246,10 +272,13 @@ export function PatientForm() {
                   required
                 />
                 <Input
-                  label="Date of Birth"
-                  type="date"
-                  {...register('dateOfBirth')}
-                  error={errors.dateOfBirth?.message}
+                  label="Age"
+                  type="number"
+                  min={0}
+                  max={150}
+                  placeholder="e.g., 35"
+                  {...register('age', { valueAsNumber: true })}
+                  error={errors.age?.message}
                   required
                 />
                 <Input
@@ -422,110 +451,78 @@ export function PatientForm() {
           {/* Current Prescriptions Section */}
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle id="prescriptions-heading">Current Prescriptions</CardTitle>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() =>
-                    appendPrescription({
-                      medicationName: '',
-                      dosage: '',
-                      frequency: '',
-                      prescriptionDate: new Date().toISOString().split('T')[0],
-                    })
-                  }
-                  aria-label="Add prescription"
-                >
-                  <svg
-                    className="w-4 h-4 mr-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                  Add Prescription
-                </Button>
-              </div>
+              <CardTitle id="prescriptions-heading">Current Prescriptions</CardTitle>
             </CardHeader>
             <CardContent>
-              {prescriptionFields.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8" role="status">
-                  No prescriptions added yet. Click "Add Prescription" to add one.
-                </p>
-              ) : (
-                <div className="space-y-6">
-                  {prescriptionFields.map((field, index) => (
-                    <div key={field.id} className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-medium">
-                          Prescription {index + 1}
-                        </h3>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removePrescription(index)}
-                          aria-label={`Remove prescription ${index + 1}`}
-                        >
-                          <svg
-                            className="w-4 h-4 mr-1"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            aria-hidden="true"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm" aria-label="Prescriptions table">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2 pr-3 font-medium text-muted-foreground">Medication</th>
+                      <th className="text-left py-2 pr-3 font-medium text-muted-foreground">Dosage</th>
+                      <th className="text-left py-2 pr-3 font-medium text-muted-foreground">Frequency</th>
+                      <th className="text-left py-2 pr-3 font-medium text-muted-foreground">Date</th>
+                      <th className="w-8" />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {prescriptionFields.map((field, index) => {
+                      const isLastRow = index === prescriptionFields.length - 1;
+                      return (
+                        <tr key={field.id} className="border-b last:border-0">
+                          <td className="py-1 pr-2">
+                            <input
+                              {...register(`prescriptions.${index}.medicationName`)}
+                              placeholder="e.g., Amoxicillin"
+                              className="w-full bg-transparent border-0 outline-none focus:ring-1 focus:ring-ring rounded px-1 py-1 placeholder:text-muted-foreground/50"
+                              aria-label={`Prescription ${index + 1} medication name`}
                             />
-                          </svg>
-                          Remove
-                        </Button>
-                      </div>
-                      <Separator className="my-4" />
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input
-                          label="Medication Name"
-                          {...register(`prescriptions.${index}.medicationName`)}
-                          error={errors.prescriptions?.[index]?.medicationName?.message}
-                          required
-                        />
-                        <Input
-                          label="Dosage"
-                          {...register(`prescriptions.${index}.dosage`)}
-                          error={errors.prescriptions?.[index]?.dosage?.message}
-                          placeholder="e.g., 10mg"
-                          required
-                        />
-                        <Input
-                          label="Frequency"
-                          {...register(`prescriptions.${index}.frequency`)}
-                          error={errors.prescriptions?.[index]?.frequency?.message}
-                          placeholder="e.g., Once daily"
-                          required
-                        />
-                        <Input
-                          label="Prescription Date"
-                          type="date"
-                          {...register(`prescriptions.${index}.prescriptionDate`)}
-                          error={errors.prescriptions?.[index]?.prescriptionDate?.message}
-                          required
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                          </td>
+                          <td className="py-1 pr-2">
+                            <input
+                              {...register(`prescriptions.${index}.dosage`)}
+                              placeholder="e.g., 500mg"
+                              className="w-full bg-transparent border-0 outline-none focus:ring-1 focus:ring-ring rounded px-1 py-1 placeholder:text-muted-foreground/50"
+                              aria-label={`Prescription ${index + 1} dosage`}
+                            />
+                          </td>
+                          <td className="py-1 pr-2">
+                            <input
+                              {...register(`prescriptions.${index}.frequency`)}
+                              placeholder="e.g., Once daily"
+                              className="w-full bg-transparent border-0 outline-none focus:ring-1 focus:ring-ring rounded px-1 py-1 placeholder:text-muted-foreground/50"
+                              aria-label={`Prescription ${index + 1} frequency`}
+                            />
+                          </td>
+                          <td className="py-1 pr-2">
+                            <input
+                              type="date"
+                              {...register(`prescriptions.${index}.prescriptionDate`)}
+                              className="w-full bg-transparent border-0 outline-none focus:ring-1 focus:ring-ring rounded px-1 py-1"
+                              aria-label={`Prescription ${index + 1} date`}
+                            />
+                          </td>
+                          <td className="py-1">
+                            {!isLastRow && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemovePrescriptionRow(index)}
+                                className="text-muted-foreground hover:text-destructive transition-colors p-1 rounded"
+                                aria-label={`Remove prescription ${index + 1}`}
+                              >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                <p className="text-xs text-muted-foreground mt-2">Start typing in any row — a new line appears automatically.</p>
+              </div>
             </CardContent>
           </Card>
 

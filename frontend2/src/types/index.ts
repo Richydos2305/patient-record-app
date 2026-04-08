@@ -1,3 +1,9 @@
+export interface IPharmacist {
+  id: string;
+  name: string;
+  phoneNumber?: string;
+}
+
 export interface IUser {
   _id: string;
   email: string;
@@ -19,6 +25,7 @@ export interface IPrescription {
 export interface IPatient {
   id: string;
   userId: string;
+  pharmacistName: string;
   fullName: string;
   age: number;
   address: string;
@@ -62,9 +69,10 @@ export interface CreatePatientPayload {
   age: number;
   address: string;
   phoneNumber: string;
+  pharmacistName: string;
   prescriptions: IPrescription[];
   appointmentDates: string[];
-  notes: string;
+  notes?: string;
   customFields?: Record<string, unknown>;
 }
 

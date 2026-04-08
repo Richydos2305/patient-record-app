@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { listPatients } from '../../api/patients';
+import { listPharmacists } from '../../api/pharmacists';
 import { AppLayout } from '../../components/layout/AppLayout';
 import type { IPatient } from '../../types';
 
@@ -21,6 +22,7 @@ function avatarColor(index: number): string {
 
 type SortKey = 'recent' | 'oldest' | 'name-asc' | 'name-desc' | 'age-asc' | 'age-desc';
 type AgeFilter = 'all' | 'under30' | '30-50' | '50-70' | 'over70';
+type LastApptFilter = 'any' | 'last7' | 'last30' | 'last3months';
 
 const SORT_LABELS: Record<SortKey, string> = {
   recent: 'Most Recent',
@@ -39,6 +41,13 @@ const AGE_LABELS: Record<AgeFilter, string> = {
   over70: 'Over 70',
 };
 
+const LAST_APPT_LABELS: Record<LastApptFilter, string> = {
+  any: 'Any Time',
+  last7: 'Last 7 days',
+  last30: 'Last 30 days',
+  last3months: 'Last 3 months',
+};
+
 export function PatientsPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
@@ -48,6 +57,10 @@ export function PatientsPage() {
   const [pendingAge, setPendingAge] = useState<AgeFilter>('all');
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
+  const [lastApptFilter, setLastApptFilter] = useState<LastApptFilter>('any');
+  const [pendingLastAppt, setPendingLastAppt] = useState<LastApptFilter>('any');
+  const [pharmacistFilter, setPharmacistFilter] = useState('');
+  const [pendingPharmacist, setPendingPharmacist] = useState('');
 
   const filterRef = useRef<HTMLDivElement>(null);
   const sortRef = useRef<HTMLDivElement>(null);
@@ -56,6 +69,15 @@ export function PatientsPage() {
     queryKey: ['patients'],
     queryFn: () => listPatients(),
   });
+  const { data: pharmacists = [] } = useQuery({
+    queryKey: ['pharmacists'],
+    queryFn: listPharmacists,
+  });
+
+  const referenceTimeRef = useRef<number | null>(null);
+  useEffect(() => {
+    referenceTimeRef.current = Date.now();
+  }, []);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -69,11 +91,17 @@ export function PatientsPage() {
 
   function applyFilter() {
     setAgeFilter(pendingAge);
+    setLastApptFilter(pendingLastAppt);
+    setPharmacistFilter(pendingPharmacist);
     setFilterOpen(false);
   }
   function clearFilter() {
     setPendingAge('all');
     setAgeFilter('all');
+    setPendingLastAppt('any');
+    setLastApptFilter('any');
+    setPendingPharmacist('');
+    setPharmacistFilter('');
     setFilterOpen(false);
   }
   function applySort() {
@@ -94,6 +122,15 @@ export function PatientsPage() {
       if (ageFilter === '30-50' && (p.age < 30 || p.age > 50)) return false;
       if (ageFilter === '50-70' && (p.age < 50 || p.age > 70)) return false;
       if (ageFilter === 'over70' && p.age <= 70) return false;
+      if (lastApptFilter !== 'any') {
+        const lastAppt = p.appointmentDates.length > 0 ? p.appointmentDates[p.appointmentDates.length - 1] : null;
+        if (!lastAppt) return false;
+        const diffMs = (referenceTimeRef.current ?? Date.now()) - new Date(lastAppt).getTime();
+        if (lastApptFilter === 'last7' && diffMs > 7 * 86400000) return false;
+        if (lastApptFilter === 'last30' && diffMs > 30 * 86400000) return false;
+        if (lastApptFilter === 'last3months' && diffMs > 90 * 86400000) return false;
+      }
+      if (pharmacistFilter && p.pharmacistName !== pharmacistFilter) return false;
       return true;
     })
     .sort((a: IPatient, b: IPatient) => {
@@ -105,7 +142,7 @@ export function PatientsPage() {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
-  const filterActive = ageFilter !== 'all';
+  const filterActive = ageFilter !== 'all' || lastApptFilter !== 'any' || pharmacistFilter !== '';
   const sortActive = sortKey !== 'recent';
 
   const mobileTopBar = (
@@ -163,6 +200,42 @@ export function PatientsPage() {
                   </button>
                 ))}
               </div>
+
+              <p className="dropdown-section-title">Last Appointment</p>
+              <div className="dropdown-options">
+                {(Object.keys(LAST_APPT_LABELS) as LastApptFilter[]).map((key) => (
+                  <button
+                    key={key}
+                    className={`dropdown-option${pendingLastAppt === key ? ' selected' : ''}`}
+                    onClick={() => setPendingLastAppt(key)}
+                  >
+                    <span className="radio-dot" />
+                    {LAST_APPT_LABELS[key]}
+                  </button>
+                ))}
+              </div>
+
+              <p className="dropdown-section-title">Pharmacist</p>
+              <div className="dropdown-options">
+                <button
+                  className={`dropdown-option${pendingPharmacist === '' ? ' selected' : ''}`}
+                  onClick={() => setPendingPharmacist('')}
+                >
+                  <span className="radio-dot" />
+                  All Pharmacists
+                </button>
+                {pharmacists.map((ph) => (
+                  <button
+                    key={ph.id}
+                    className={`dropdown-option${pendingPharmacist === ph.name ? ' selected' : ''}`}
+                    onClick={() => setPendingPharmacist(ph.name)}
+                  >
+                    <span className="radio-dot" />
+                    {ph.name}
+                  </button>
+                ))}
+              </div>
+
               <div className="dropdown-footer">
                 <button className="btn-ghost" onClick={clearFilter}>Clear</button>
                 <button className="btn-save" onClick={applyFilter}>Apply</button>
@@ -241,9 +314,20 @@ export function PatientsPage() {
                   Last appointment: {formatDate(p.appointmentDates[p.appointmentDates.length - 1])}
                 </div>
               )}
+              {p.pharmacistName && (
+                <div className="attended-row">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <polyline points="16 11 18 13 22 9"/>
+                  </svg>
+                  Attended to by {p.pharmacistName}
+                </div>
+              )}
               <button className="btn-outline" onClick={() => navigate(`/patients/${p.id}`)}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
                 </svg>
                 View Patient
               </button>

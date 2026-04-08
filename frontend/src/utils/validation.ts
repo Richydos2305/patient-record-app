@@ -9,14 +9,19 @@ export const prescriptionSchema = z.object({
 
 export const patientFormSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
-  dateOfBirth: z.string().min(1, 'Date of birth is required'),
+  age: z
+    .number({ error: 'Age must be a number' })
+    .int('Age must be a whole number')
+    .min(0, 'Age must be 0 or greater')
+    .max(150, 'Age must be 150 or less'),
   address: z.string().min(5, 'Address must be at least 5 characters'),
   phoneNumber: z.string().min(10, 'Phone number must be at least 10 characters'),
   appointmentDates: z
     .array(z.object({ date: z.string().min(1, 'Date is required') }))
     .min(1, 'At least one appointment date is required'),
   notes: z.string().optional(),
-  prescriptions: z.array(prescriptionSchema),
+  // Rows with all fields empty are stripped on submit; validation only runs on filled rows
+  prescriptions: z.array(prescriptionSchema.partial()).optional(),
 });
 
 export type PatientFormData = z.infer<typeof patientFormSchema>;

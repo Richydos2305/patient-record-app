@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createPatient } from '../../api/patients';
+import { listPharmacists } from '../../api/pharmacists';
 import { AppLayout } from '../../components/layout/AppLayout';
 import { PatientForm, type PatientFormValues } from '../../components/PatientForm';
 
@@ -10,6 +11,11 @@ export function CreatePatientPage() {
   const queryClient = useQueryClient();
   const [error, setError] = useState('');
 
+  const { data: pharmacists = [] } = useQuery({
+    queryKey: ['pharmacists'],
+    queryFn: listPharmacists,
+  });
+
   const mutation = useMutation({
     mutationFn: (values: PatientFormValues) =>
       createPatient({
@@ -17,11 +23,12 @@ export function CreatePatientPage() {
         age: Number(values.age),
         phoneNumber: values.phoneNumber,
         address: values.address,
+        pharmacistName: values.pharmacistName,
         prescriptions: values.prescriptions.map(({ medicationName, dosage, frequency, prescriptionDate }) => ({
           medicationName, dosage, frequency, prescriptionDate,
         })),
         appointmentDates: values.appointmentDate ? [values.appointmentDate] : [],
-        notes: values.notes,
+        ...(values.notes ? { notes: values.notes } : {}),
         customFields: Object.fromEntries(
           values.customFields.filter((f) => f.name).map((f) => [f.name, f.value])
         ),
@@ -59,6 +66,7 @@ export function CreatePatientPage() {
       <PatientForm
         onSubmit={handleSubmit}
         onCancel={() => navigate('/patients')}
+        pharmacists={pharmacists}
         submitLabel="Save Patient"
         loading={mutation.isPending}
         error={error}

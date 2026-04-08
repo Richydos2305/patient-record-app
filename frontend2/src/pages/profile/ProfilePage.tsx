@@ -74,6 +74,7 @@ export function ProfilePage() {
 
   const userInitials = user?.fullName ? initials(user.fullName) : 'U';
   const companyInitials = user?.companyName ? initials(user.companyName) : 'P';
+  const roleLabel = !user?.role || user.role === 'pharmacist' ? 'Owner' : user.role.charAt(0).toUpperCase() + user.role.slice(1);
 
   const mobileTopBar = (
     <div className="mobile-topbar">
@@ -98,7 +99,7 @@ export function ProfilePage() {
         <div style={{ fontFamily: "'Funnel Sans', system-ui, sans-serif", fontSize: 18, fontWeight: 700 }}>
           {user?.fullName}
         </div>
-        <span className="profile-badge">{user?.role ?? 'Pharmacist'}</span>
+        <span className="profile-badge">{roleLabel}</span>
       </div>
 
       {/* Desktop hero */}
@@ -108,7 +109,7 @@ export function ProfilePage() {
           <div style={{ fontFamily: "'Funnel Sans', system-ui, sans-serif", fontSize: 22, fontWeight: 700, marginBottom: 4 }}>
             {user?.fullName}
           </div>
-          <span className="profile-badge">{user?.role ?? 'Pharmacist'}</span>
+          <span className="profile-badge">{roleLabel}</span>
         </div>
       </div>
 

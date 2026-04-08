@@ -598,6 +598,21 @@ body.sidebar-collapsed .main-area { margin-left: 64px; }
   white-space: nowrap;
 }
 .add-field-btn:hover { background: #3d342e; }
+.add-rx-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-input);
+  border: none;
+  background: var(--surface-inverse);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--surface-primary);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.add-rx-btn:hover { background: #3d342e; }
 
 /* ─── Custom Fields ─── */
 .custom-fields-container {
@@ -1091,6 +1106,151 @@ body.sidebar-collapsed .main-area { margin-left: 64px; }
 }
 .delete-btn:hover { background: #FEE2E2; }
 
+/* ─── Attended-row ─── */
+.attended-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--fg-muted);
+  margin-top: 2px;
+}
+.attended-row svg { flex-shrink: 0; }
+
+/* ─── Form Select ─── */
+.form-select {
+  width: 100%;
+  height: 40px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-input);
+  background: var(--input-fill);
+  font-size: 13px;
+  color: var(--surface-inverse);
+  padding: 0 12px;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+.form-select:focus { border-color: var(--accent-primary); }
+.form-select.placeholder { color: var(--fg-muted); }
+
+/* ─── Locked Input ─── */
+.locked-input {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-input);
+  background: var(--surface-secondary, #f7f5f1);
+  font-size: 13px;
+  color: var(--fg-muted);
+  cursor: not-allowed;
+}
+.locked-input svg { color: var(--fg-muted); flex-shrink: 0; }
+
+/* ─── Pharmacists Page ─── */
+.pharmacist-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.pharmacist-card {
+  background: var(--card-fill);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.pharmacist-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 18px 14px;
+}
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.pharmacist-info { display: flex; flex-direction: column; gap: 2px; }
+.pharmacist-name { font-size: 14px; font-weight: 600; color: var(--surface-inverse); }
+.pharmacist-role { font-size: 12px; color: var(--fg-muted); }
+.pharmacist-card-divider { height: 1px; background: var(--border-subtle); }
+.pharmacist-card-bottom { padding: 12px 18px; display: flex; flex-direction: column; gap: 10px; }
+.pharmacist-patients-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--fg-muted); }
+.pharmacist-actions { display: flex; gap: 8px; }
+.btn-edit-pharm {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background: var(--card-fill);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg-secondary);
+  cursor: pointer;
+}
+.btn-edit-pharm:hover { background: var(--active-nav-bg); }
+.btn-delete-pharm {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: none;
+  background: #FEF2F2;
+  color: #EF4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.btn-delete-pharm:hover { background: #FEE2E2; }
+
+/* ─── Modal ─── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-card {
+  background: var(--card-fill);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 440px;
+  margin: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+.modal-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 20px 20px 0; }
+.modal-title { font-size: 16px; font-weight: 700; color: var(--surface-inverse); }
+.modal-subtitle { font-size: 13px; color: var(--fg-muted); margin-top: 2px; }
+.modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--fg-muted); padding: 0; line-height: 1; }
+.modal-divider { height: 1px; background: var(--border-subtle); margin: 16px 0 0; }
+.modal-body { padding: 16px 20px; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 0 20px 20px; }
+
 /* ══════════════════════════════════════
    RESPONSIVE — MOBILE (≤ 768px)
 ══════════════════════════════════════ */
@@ -1131,6 +1291,9 @@ body.sidebar-collapsed .main-area { margin-left: 64px; }
   .mobile-form-actions { display: flex; gap: 12px; padding-bottom: 8px; }
   .mobile-form-actions .btn-ghost { flex: 0 0 auto; padding: 10px 16px; }
   .mobile-form-actions .btn-save { flex: 1; justify-content: center; }
+
+  /* Pharmacists grid */
+  .pharmacist-cards-grid { grid-template-columns: 1fr; }
 
   /* Spacing tweaks */
   .page-title { font-size: 22px; margin-bottom: 16px; }
