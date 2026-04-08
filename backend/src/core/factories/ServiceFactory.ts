@@ -3,11 +3,13 @@ import { PatientService } from '../services/patient/index';
 import { CustomFieldService } from '../services/customField/index';
 import { FileService } from '../services/file/index';
 import { UserService } from '../services/user/index';
+import { PharmacistService } from '../services/pharmacist/index';
 import { UserRepository } from '../repositories/UserRepository';
 import { RefreshTokenRepository } from '../repositories/RefreshTokenRepository';
 import { PatientRepository } from '../repositories/PatientRepository';
 import { CustomFieldRepository } from '../repositories/CustomFieldRepository';
 import { FileRepository } from '../repositories/FileRepository';
+import { PharmacistRepository } from '../repositories/PharmacistRepository';
 
 export class ServiceFactory {
     static createAuthService(): AuthService {
@@ -19,7 +21,7 @@ export class ServiceFactory {
     }
 
     static createPatientService(): PatientService {
-        return new PatientService(new PatientRepository());
+        return new PatientService(new PatientRepository(), new PharmacistRepository());
     }
 
     static createCustomFieldService(): CustomFieldService {
@@ -28,5 +30,9 @@ export class ServiceFactory {
 
     static createFileService(): FileService {
         return new FileService(new FileRepository());
+    }
+
+    static createPharmacistService(): PharmacistService {
+        return new PharmacistService(new PharmacistRepository());
     }
 }

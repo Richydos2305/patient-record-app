@@ -15,11 +15,12 @@ const prescriptionSchema = new Schema(
 
 const patientSchema = new Schema<IPatient>(
     {
-        userId:      { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-        fullName: { type: String, required: true, trim: true },
-        age:      { type: Number, required: true },
-        address:  { type: String, required: true, trim: true },
-        phoneNumber: { type: String, required: true, trim: true },
+        userId:         { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+        pharmacistName: { type: String, required: true, trim: true },
+        fullName:       { type: String, required: true, trim: true },
+        age:            { type: Number, required: true },
+        address:        { type: String, required: true, trim: true },
+        phoneNumber:    { type: String, required: true, trim: true },
         prescriptions:    [prescriptionSchema],
         appointmentDates: [{ type: Date }],
         notes:            { type: String, default: '' },

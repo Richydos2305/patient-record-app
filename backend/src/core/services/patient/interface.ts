@@ -6,6 +6,7 @@ export interface CreatePatientBody {
     age: number;
     address: string;
     phoneNumber: string;
+    pharmacistName: string;
     prescriptions?: IPrescription[];
     appointmentDates?: string[];
     notes?: string;

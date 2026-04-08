@@ -4,6 +4,7 @@ import { logger } from './logger';
 import { RegisterBody, LoginBody, UpdateProfileBody } from '../services/auth/interface';
 import { CreatePatientBody, UpdatePatientBody } from '../services/patient/interface';
 import { CreateCustomFieldBody, UpdateCustomFieldBody } from '../services/customField/interface';
+import { CreatePharmacistBody, UpdatePharmacistBody } from '../services/pharmacist/interface';
 
 const validate = (body: object, schema: Joi.ObjectSchema | Joi.Schema, context: string): void => {
     const { error } = schema.validate(body, { abortEarly: false });
@@ -64,6 +65,7 @@ export const createPatientSchema = Joi.object({
     age:              Joi.number().integer().min(0).max(150).required(),
     address:          Joi.string().required(),
     phoneNumber:      Joi.string().required(),
+    pharmacistName:   Joi.string().required(),
     prescriptions:    Joi.array().items(prescriptionSchema),
     appointmentDates: Joi.array().items(Joi.string().isoDate()),
     notes:            Joi.string(),
@@ -114,4 +116,22 @@ export const validateCreateCustomFieldPayload = (body: CreateCustomFieldBody): v
 
 export const validateUpdateCustomFieldPayload = (body: UpdateCustomFieldBody): void => {
     validate(body, updateCustomFieldSchema, 'Update Custom Field');
+};
+
+export const createPharmacistSchema = Joi.object({
+    name:        Joi.string().required(),
+    phoneNumber: Joi.string(),
+});
+
+export const updatePharmacistSchema = Joi.object({
+    name:        Joi.string(),
+    phoneNumber: Joi.string(),
+}).min(1);
+
+export const validateCreatePharmacistPayload = (body: CreatePharmacistBody): void => {
+    validate(body, createPharmacistSchema, 'Create Pharmacist');
+};
+
+export const validateUpdatePharmacistPayload = (body: UpdatePharmacistBody): void => {
+    validate(body, updatePharmacistSchema, 'Update Pharmacist');
 };

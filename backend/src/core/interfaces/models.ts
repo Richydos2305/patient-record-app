@@ -27,6 +27,12 @@ export interface ICustomField {
     options?: string[];
 }
 
+export interface IPharmacist {
+    userId: Types.ObjectId;
+    name: string;
+    phoneNumber?: string;
+}
+
 export interface IPrescription {
     medicationName: string;
     dosage: string;
@@ -45,6 +51,7 @@ export interface IFile {
 
 export interface IPatient {
     userId: Types.ObjectId;
+    pharmacistName: string;
     fullName: string;
     age: number;
     address: string;

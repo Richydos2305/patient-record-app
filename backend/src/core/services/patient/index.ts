@@ -1,12 +1,16 @@
 import { Types } from 'mongoose';
 import { PatientRepository } from '../../repositories/PatientRepository';
+import { PharmacistRepository } from '../../repositories/PharmacistRepository';
 import { validateCreatePatientPayload, validateUpdatePatientPayload } from '../../helpers/validation';
-import { NotFoundError } from '../../errors/CustomErrors';
+import { NotFoundError, ValidationError } from '../../errors/CustomErrors';
 import { IPatientDocument } from '../../models/Patient';
 import { CreatePatientBody, UpdatePatientBody, ListPatientsQuery, PaginatedPatientsResult } from './interface';
 
 export class PatientService {
-    constructor(private readonly patientRepo: PatientRepository) {}
+    constructor(
+        private readonly patientRepo: PatientRepository,
+        private readonly pharmacistRepo: PharmacistRepository,
+    ) {}
 
     async list(query: ListPatientsQuery, userId: string): Promise<PaginatedPatientsResult> {
         const page = Math.max(1, Number(query.page) || 1);
@@ -30,6 +34,8 @@ export class PatientService {
 
     async create(body: CreatePatientBody, userId: string): Promise<IPatientDocument> {
         validateCreatePatientPayload(body);
+        const pharmacist = await this.pharmacistRepo.findOne({ userId, name: body.pharmacistName });
+        if (!pharmacist) throw new ValidationError('Pharmacist not found or does not belong to this user');
         return this.patientRepo.create({
             ...body,
             userId: new Types.ObjectId(userId),
