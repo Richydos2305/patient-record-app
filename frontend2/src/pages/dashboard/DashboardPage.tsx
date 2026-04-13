@@ -32,7 +32,7 @@ export function DashboardPage() {
   const { data: user } = useQuery({ queryKey: ['me'], queryFn: getMe });
   const { data: patients = [], isLoading } = useQuery({
     queryKey: ['patients'],
-    queryFn: () => listPatients(),
+    queryFn: () => listPatients({ limit: 1000 }),
   });
 
   const recentPatients = [...patients]

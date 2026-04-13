@@ -14,6 +14,17 @@ export async function listPatients(params?: ListPatientsParams): Promise<IPatien
   return data.data.patients;
 }
 
+export interface PaginatedPatientsResponse {
+  patients: IPatient[];
+  total: number;
+  page: number;
+}
+
+export async function listPatientsPaginated(params?: ListPatientsParams): Promise<PaginatedPatientsResponse> {
+  const { data } = await apiClient.get<{ data: { patients: IPatient[]; total: number; page: number } }>('/api/patients', { params });
+  return { patients: data.data.patients, total: data.data.total, page: params?.page ?? 1 };
+}
+
 export async function getPatient(id: string): Promise<IPatient> {
   const { data } = await apiClient.get<{ data: IPatient }>(`/api/patients/${id}`);
   return data.data;

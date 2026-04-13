@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { listPatients } from '../../api/patients';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { listPatientsPaginated } from '../../api/patients';
 import { listPharmacists } from '../../api/pharmacists';
 import { AppLayout } from '../../components/layout/AppLayout';
-import type { IPatient } from '../../types';
+import type { IPatient, IPharmacist } from '../../types';
 
 function patientInitials(name: string): string {
   return name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2);
@@ -64,11 +64,25 @@ export function PatientsPage() {
 
   const filterRef = useRef<HTMLDivElement>(null);
   const sortRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const { data: patients = [], isLoading } = useQuery({
-    queryKey: ['patients'],
-    queryFn: () => listPatients(),
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['patients-infinite'],
+    queryFn: ({ pageParam }) => listPatientsPaginated({ page: pageParam as number, limit: 20 }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const totalPages = Math.ceil(lastPage.total / 20);
+      return lastPage.page < totalPages ? lastPage.page + 1 : undefined;
+    },
   });
+
+  const allPatients = data?.pages.flatMap((p) => p.patients) ?? [];
   const { data: pharmacists = [] } = useQuery({
     queryKey: ['pharmacists'],
     queryFn: listPharmacists,
@@ -78,6 +92,21 @@ export function PatientsPage() {
   useEffect(() => {
     referenceTimeRef.current = Date.now();
   }, []);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasNextPage) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -114,7 +143,7 @@ export function PatientsPage() {
     setSortOpen(false);
   }
 
-  const filtered = patients
+  const filtered = allPatients
     .filter((p: IPatient) => {
       const q = search.toLowerCase();
       if (q && !p.fullName.toLowerCase().includes(q)) return false;
@@ -148,7 +177,7 @@ export function PatientsPage() {
   const mobileTopBar = (
     <div className="mobile-topbar">
       <span className="mobile-topbar-title">Patients</span>
-      <span className="badge-count">{filtered.length} total</span>
+      <span className="badge-count">{data?.pages[0]?.total ?? filtered.length} total</span>
     </div>
   );
 
@@ -156,7 +185,7 @@ export function PatientsPage() {
     <AppLayout mobileTopBar={mobileTopBar}>
       <div className="form-page-header">
         <h1 className="page-title" style={{ marginBottom: 0 }}>Patients</h1>
-        <span className="badge-count">{isLoading ? '…' : `${filtered.length} total`}</span>
+        <span className="badge-count">{isLoading ? '…' : `${data?.pages[0]?.total ?? filtered.length} total`}</span>
       </div>
 
       <div className="toolbar">
@@ -224,7 +253,7 @@ export function PatientsPage() {
                   <span className="radio-dot" />
                   All Pharmacists
                 </button>
-                {pharmacists.map((ph) => (
+                {pharmacists.map((ph: IPharmacist) => (
                   <button
                     key={ph.id}
                     className={`dropdown-option${pendingPharmacist === ph.name ? ' selected' : ''}`}
@@ -292,7 +321,7 @@ export function PatientsPage() {
         </div>
       ) : (
         <div className="patient-cards-grid">
-          {filtered.map((p: IPatient, i) => (
+          {filtered.map((p: IPatient, i: number) => (
             <div className="patient-card" key={p.id}>
               <div className="patient-card-top">
                 <div className="avatar" style={{ background: avatarColor(i) }}>
@@ -335,6 +364,10 @@ export function PatientsPage() {
           ))}
         </div>
       )}
+      {isFetchingNextPage && (
+        <div className="spinner-wrap" style={{ padding: '16px 0' }}><div className="spinner" /></div>
+      )}
+      <div ref={sentinelRef} style={{ height: 1 }} />
     </AppLayout>
   );
 }

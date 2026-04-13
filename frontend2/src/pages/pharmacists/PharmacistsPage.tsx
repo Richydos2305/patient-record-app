@@ -111,7 +111,7 @@ export function PharmacistsPage() {
   });
   const { data: patients = [] } = useQuery({
     queryKey: ['patients'],
-    queryFn: () => listPatients(),
+    queryFn: () => listPatients({ limit: 1000 }),
   });
 
   const createMutation = useMutation({
