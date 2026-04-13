@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getMe, updateMe } from '../../api/users';
+import { logout } from '../../api/auth';
 import { AppLayout } from '../../components/layout/AppLayout';
 
 function initials(name: string): string {
@@ -9,6 +11,7 @@ function initials(name: string): string {
 
 export function ProfilePage() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { data: user, isLoading } = useQuery({ queryKey: ['me'], queryFn: getMe });
 
   const [editing, setEditing] = useState(false);
@@ -72,6 +75,14 @@ export function ProfilePage() {
     }
   }
 
+  async function handleSignOut() {
+    const refreshToken = localStorage.getItem('refreshToken') ?? '';
+    try { await logout(refreshToken); } catch { /* ignore */ }
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    navigate('/login');
+  }
+
   const userInitials = user?.fullName ? initials(user.fullName) : 'U';
   const companyInitials = user?.companyName ? initials(user.companyName) : 'P';
   const roleLabel = !user?.role || user.role === 'pharmacist' ? 'Owner' : user.role.charAt(0).toUpperCase() + user.role.slice(1);
@@ -79,7 +90,7 @@ export function ProfilePage() {
   const mobileTopBar = (
     <div className="mobile-topbar">
       <span className="mobile-topbar-title">My Profile</span>
-      <div style={{ width: 24 }} />
+      <button className="btn-save" style={{ padding: '6px 12px', fontSize: 13 }} onClick={handleSignOut}>Sign Out</button>
     </div>
   );
 

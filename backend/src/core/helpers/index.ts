@@ -22,11 +22,5 @@ export const sanitizeUser = (user: Document): SanitizedUser => {
 
 export const sanitizePatient = (patient: Document): Record<string, unknown> => {
     const { _id, __v, ...rest } = patient.toObject() as Record<string, unknown>;
-    const prescriptions = Array.isArray(rest.prescriptions)
-        ? (rest.prescriptions as Record<string, unknown>[]).map((p) => {
-            const { _id: pid, ...fields } = p;
-            return { ...fields, id: String(pid) };
-        })
-        : rest.prescriptions;
-    return { ...rest, id: String(_id), prescriptions };
+    return { ...rest, id: String(_id) };
 };

@@ -161,6 +161,29 @@ textarea.form-input {
 }
 .auth-footer-link .link:hover { text-decoration: underline; }
 
+/* Password input wrapper */
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-wrapper .form-input {
+  width: 100%;
+  padding-right: 40px;
+}
+.pwd-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--fg-muted);
+  display: flex;
+  align-items: center;
+}
+.pwd-toggle:hover { color: var(--fg-secondary); }
+
 /* Mobile brand block (auth only) */
 .mobile-brand {
   display: none;

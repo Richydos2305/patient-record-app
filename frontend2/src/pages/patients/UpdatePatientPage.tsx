@@ -25,9 +25,7 @@ export function UpdatePatientPage() {
         age: Number(values.age),
         phoneNumber: values.phoneNumber,
         address: values.address,
-        prescriptions: values.prescriptions.map(({ medicationName, dosage, frequency, prescriptionDate }) => ({
-          medicationName, dosage, frequency, prescriptionDate,
-        })),
+        prescriptions: values.prescriptions.map(({ text }) => text),
         appointmentDates: values.appointmentDate ? [values.appointmentDate] : [],
         ...(values.notes ? { notes: values.notes } : {}),
         customFields: Object.fromEntries(
@@ -73,7 +71,9 @@ export function UpdatePatientPage() {
                 .slice(0, 10)
             : '',
         notes: patient.notes,
-        prescriptions: Array.isArray(patient.prescriptions) ? patient.prescriptions : [],
+        prescriptions: Array.isArray(patient.prescriptions)
+          ? patient.prescriptions.map((text: string) => ({ text }))
+          : [],
         customFields: Object.entries(patient.customFields ?? {}).map(([name, value]) => ({
           id: name,
           name,

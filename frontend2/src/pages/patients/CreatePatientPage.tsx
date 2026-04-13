@@ -24,9 +24,7 @@ export function CreatePatientPage() {
         phoneNumber: values.phoneNumber,
         address: values.address,
         pharmacistName: values.pharmacistName,
-        prescriptions: values.prescriptions.map(({ medicationName, dosage, frequency, prescriptionDate }) => ({
-          medicationName, dosage, frequency, prescriptionDate,
-        })),
+        prescriptions: values.prescriptions.map(({ text }) => text),
         appointmentDates: values.appointmentDate ? [values.appointmentDate] : [],
         ...(values.notes ? { notes: values.notes } : {}),
         customFields: Object.fromEntries(

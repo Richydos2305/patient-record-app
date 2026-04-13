@@ -1,4 +1,3 @@
-import { IPrescription } from '../../interfaces/models';
 import { IPatientDocument } from '../../models/Patient';
 
 export interface CreatePatientBody {
@@ -7,7 +6,7 @@ export interface CreatePatientBody {
     address: string;
     phoneNumber: string;
     pharmacistName: string;
-    prescriptions?: IPrescription[];
+    prescriptions?: string[];
     appointmentDates?: string[];
     notes?: string;
     customFields?: Record<string, unknown>;
@@ -18,7 +17,7 @@ export interface UpdatePatientBody {
     age?: number;
     address?: string;
     phoneNumber?: string;
-    prescriptions?: IPrescription[];
+    prescriptions?: string[];
     appointmentDates?: string[];
     notes?: string;
     customFields?: Record<string, unknown>;

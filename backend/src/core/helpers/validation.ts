@@ -53,20 +53,13 @@ export const validateUpdateProfilePayload = (body: UpdateProfileBody): void => {
     validate(body, updateProfileSchema, 'Update Profile');
 };
 
-const prescriptionSchema = Joi.object({
-    medicationName:   Joi.string().required(),
-    dosage:           Joi.string().required(),
-    frequency:        Joi.string().required(),
-    prescriptionDate: Joi.string().required(),
-});
-
 export const createPatientSchema = Joi.object({
     fullName:         Joi.string().required(),
     age:              Joi.number().integer().min(0).max(150).required(),
     address:          Joi.string().required(),
     phoneNumber:      Joi.string().required(),
     pharmacistName:   Joi.string().required(),
-    prescriptions:    Joi.array().items(prescriptionSchema),
+    prescriptions:    Joi.array().items(Joi.string()),
     appointmentDates: Joi.array().items(Joi.string().isoDate()),
     notes:            Joi.string(),
     customFields:     Joi.object().unknown(true),
@@ -77,7 +70,7 @@ export const updatePatientSchema = Joi.object({
     age:              Joi.number().integer().min(0).max(150),
     address:          Joi.string(),
     phoneNumber:      Joi.string(),
-    prescriptions:    Joi.array().items(prescriptionSchema),
+    prescriptions:    Joi.array().items(Joi.string()),
     appointmentDates: Joi.array().items(Joi.string().isoDate()),
     notes:            Joi.string(),
     customFields:     Joi.object().unknown(true),

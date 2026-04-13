@@ -3,16 +3,6 @@ import { IPatient } from '../interfaces/models';
 
 export type { IPatient };
 
-const prescriptionSchema = new Schema(
-    {
-        medicationName:   { type: String, required: true, trim: true },
-        dosage:           { type: String, required: true, trim: true },
-        frequency:        { type: String, required: true, trim: true },
-        prescriptionDate: { type: String, required: true },
-    },
-    { _id: true },
-);
-
 const patientSchema = new Schema<IPatient>(
     {
         userId:         { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
@@ -21,7 +11,7 @@ const patientSchema = new Schema<IPatient>(
         age:            { type: Number, required: true },
         address:        { type: String, required: true, trim: true },
         phoneNumber:    { type: String, required: true, trim: true },
-        prescriptions:    [prescriptionSchema],
+        prescriptions:    [{ type: String, trim: true }],
         appointmentDates: [{ type: Date }],
         notes:            { type: String, default: '' },
         customFields:     { type: Schema.Types.Mixed, default: {} },

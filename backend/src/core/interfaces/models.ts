@@ -33,13 +33,6 @@ export interface IPharmacist {
     phoneNumber?: string;
 }
 
-export interface IPrescription {
-    medicationName: string;
-    dosage: string;
-    frequency: string;
-    prescriptionDate: string;
-}
-
 export interface IFile {
     originalName: string;
     cloudinaryId: string;
@@ -56,7 +49,7 @@ export interface IPatient {
     age: number;
     address: string;
     phoneNumber: string;
-    prescriptions: IPrescription[];
+    prescriptions: string[];
     appointmentDates: Date[];
     notes: string;
     customFields: Record<string, unknown>;

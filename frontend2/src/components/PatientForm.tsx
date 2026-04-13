@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import type { IPrescription, IPharmacist } from '../types';
+import type { IPharmacist } from '../types';
 
 export interface CustomFieldEntry {
   id: string;
@@ -16,7 +16,7 @@ export interface PatientFormValues {
   pharmacistName: string;
   appointmentDate: string;
   notes: string;
-  prescriptions: IPrescription[];
+  prescriptions: { text: string }[];
   customFields: CustomFieldEntry[];
 }
 
@@ -31,8 +31,6 @@ interface PatientFormProps {
   isUpdate?: boolean;
 }
 
-const today = new Date().toISOString().slice(0, 10);
-
 const DEFAULT_VALUES: PatientFormValues = {
   fullName: '',
   age: '',
@@ -41,7 +39,7 @@ const DEFAULT_VALUES: PatientFormValues = {
   pharmacistName: '',
   appointmentDate: '',
   notes: '',
-  prescriptions: [{ medicationName: '', dosage: '', frequency: '', prescriptionDate: today }],
+  prescriptions: [],
   customFields: [],
 };
 
@@ -55,8 +53,8 @@ export function PatientForm({ initialValues, onSubmit, onCancel, submitLabel, lo
       shouldFocusLastRx.current = false;
       const sections = rxContainerRef.current.querySelectorAll('.rx-section');
       const last = sections[sections.length - 1];
-      const firstInput = last?.querySelector('.rx-input') as HTMLInputElement | null;
-      firstInput?.focus();
+      const textarea = last?.querySelector('textarea') as HTMLTextAreaElement | null;
+      textarea?.focus();
     }
   }, [values.prescriptions.length]);
 
@@ -64,19 +62,19 @@ export function PatientForm({ initialValues, onSubmit, onCancel, submitLabel, lo
     setValues((v) => ({ ...v, [field]: value }));
   }
 
-  // Prescriptions as structured rows
+  // Prescriptions as textarea rows
   function addRx() {
     shouldFocusLastRx.current = true;
     setValues((v) => ({
       ...v,
-      prescriptions: [...v.prescriptions, { medicationName: '', dosage: '', frequency: '', prescriptionDate: today }],
+      prescriptions: [...v.prescriptions, { text: '' }],
     }));
   }
 
-  function updateRx(index: number, patch: Partial<IPrescription>) {
+  function updateRxText(index: number, text: string) {
     setValues((v) => ({
       ...v,
-      prescriptions: v.prescriptions.map((rx, i) => (i === index ? { ...rx, ...patch } : rx)),
+      prescriptions: v.prescriptions.map((rx, i) => (i === index ? { text } : rx)),
     }));
   }
 
@@ -298,12 +296,14 @@ export function PatientForm({ initialValues, onSubmit, onCancel, submitLabel, lo
 
       {/* Prescriptions */}
       <div className="card form-section">
-        <div className="card-header"><h3>Prescriptions</h3></div>
+        <div className="card-header">
+          <h3>Prescriptions</h3>
+          <button type="button" className="add-rx-btn" onClick={addRx}>+ Add Prescription</button>
+        </div>
         <div ref={rxContainerRef} className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {values.prescriptions.map((rx, i) => (
             <div className="rx-section" key={i}>
-              <div className="rx-label-row">
-                <span className="rx-section-label">PRESCRIPTION {i + 1}</span>
+              <div className="rx-label-row" style={{ justifyContent: 'flex-end' }}>
                 <button
                   type="button"
                   className="rx-delete-btn"
@@ -318,53 +318,14 @@ export function PatientForm({ initialValues, onSubmit, onCancel, submitLabel, lo
                   </svg>
                 </button>
               </div>
-              <div className="rx-fields">
-                <div className="rx-field-group">
-                  <label className="rx-field-label">NAME</label>
-                  <input
-                    className="rx-input"
-                    type="text"
-                    placeholder="e.g. Metformin"
-                    value={rx.medicationName}
-                    onChange={(e) => updateRx(i, { medicationName: e.target.value })}
-                  />
-                </div>
-                <div className="rx-field-group">
-                  <label className="rx-field-label">DOSAGE</label>
-                  <input
-                    className="rx-input"
-                    type="text"
-                    placeholder="e.g. 500mg"
-                    value={rx.dosage}
-                    onChange={(e) => updateRx(i, { dosage: e.target.value })}
-                  />
-                </div>
-                <div className="rx-field-group">
-                  <label className="rx-field-label">FREQUENCY</label>
-                  <input
-                    className="rx-input"
-                    type="text"
-                    placeholder="e.g. Twice daily"
-                    value={rx.frequency}
-                    onChange={(e) => updateRx(i, { frequency: e.target.value })}
-                  />
-                </div>
-                <div className="rx-field-group">
-                  <label className="rx-field-label">DATE PRESCRIBED</label>
-                  <input
-                    className="rx-input"
-                    type="date"
-                    value={rx.prescriptionDate}
-                    onChange={(e) => updateRx(i, { prescriptionDate: e.target.value })}
-                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addRx(); } }}
-                  />
-                </div>
-              </div>
+              <textarea
+                className="form-input"
+                placeholder="e.g. Metformin 500mg, twice daily..."
+                value={rx.text}
+                onChange={(e) => updateRxText(i, e.target.value)}
+              />
             </div>
           ))}
-          <button type="button" className="add-field-btn rx-add-touch" onClick={addRx}>
-            + Add Prescription
-          </button>
         </div>
       </div>
 

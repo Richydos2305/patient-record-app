@@ -15,12 +15,6 @@ export interface IUser {
   primaryColor?: string;
 }
 
-export interface IPrescription {
-  medicationName: string;
-  dosage: string;
-  frequency: string;
-  prescriptionDate: string;
-}
 
 export interface IPatient {
   id: string;
@@ -30,7 +24,7 @@ export interface IPatient {
   age: number;
   address: string;
   phoneNumber: string;
-  prescriptions: IPrescription[];
+  prescriptions: string[];
   appointmentDates: string[];
   notes: string;
   customFields: Record<string, unknown>;
@@ -70,7 +64,7 @@ export interface CreatePatientPayload {
   address: string;
   phoneNumber: string;
   pharmacistName: string;
-  prescriptions: IPrescription[];
+  prescriptions: string[];
   appointmentDates: string[];
   notes?: string;
   customFields?: Record<string, unknown>;
