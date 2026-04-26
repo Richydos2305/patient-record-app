@@ -10,7 +10,14 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "lint-fix": "npm run lint -- --fix",
+    "prettier": "prettier \"**/*.+(ts|js|json)\"",
+    "format": "npm run prettier -- --write",
+    "check-format": "npm run prettier -- --check",
+    "check-types": "tsc --noEmit",
+    "validate": "npm run check-format && npm run lint && npm run build",
+    "prepare": "husky"
   },
   "dependencies": {
     "@types/cors": "^2.8.19",
@@ -39,6 +46,16 @@
     "nodemon": "^3.1.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4",
-    "vitest": "^2.1.1"
+    "vitest": "^2.1.1",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "@typescript-eslint/eslint-plugin": "^8.17.0",
+    "@typescript-eslint/parser": "^8.17.0",
+    "typescript-eslint": "^8.15.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.4.2"
   }
 }
